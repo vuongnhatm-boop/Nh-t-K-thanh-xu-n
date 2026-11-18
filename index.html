@@ -440,23 +440,51 @@
         .camera-container {
             position: relative;
             max-width: 480px;
+            width: 100%;
             margin: 0 auto 20px;
-            border-radius: 15px;
+            border-radius: 20px;
             overflow: hidden;
-            background: #232323;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            background: #18181b;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             aspect-ratio: 4/3;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: aspect-ratio 0.3s ease;
         }
+        .camera-stage {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #09090b;
+            overflow: hidden;
+        }
         #cameraVideo {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
             object-fit: cover;
             transform: scaleX(-1);
             display: none;
+            z-index: 1;
+        }
+        #cameraVideo.rear-camera {
+            transform: none !important;
+        }
+        #userPhotoPreview {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+            z-index: 2;
         }
         #cameraFrameOverlay {
             position: absolute;
@@ -464,16 +492,32 @@
             left: 0;
             width: 100%;
             height: 100%;
-            object-fit: contain;
+            object-fit: fill;
             pointer-events: none;
             z-index: 5;
             display: none;
         }
         .camera-placeholder {
+            position: relative;
+            z-index: 3;
             color: #d1d5db;
             text-align: center;
-            padding: 20px;
+            padding: 24px 18px;
             font-size: 1.05em;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-flip, .btn-native-cam {
+            background: rgba(255, 255, 255, 0.95);
+            color: var(--ink);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        .btn-flip:hover, .btn-native-cam:hover {
+            background: white;
+            border-color: var(--pink);
+            color: var(--red);
         }
         .countdown-overlay {
             position: absolute;
@@ -2114,16 +2158,30 @@
                 width: 100% !important;
                 margin-bottom: 15px !important;
             }
+            /* Nút điều khiển chụp ảnh & giao diện mobile gọn gàng */
             .booth-controls {
+                display: grid !important;
+                grid-template-columns: repeat(2, 1fr) !important;
                 gap: 8px !important;
                 width: 100% !important;
             }
             .booth-controls .btn-booth {
-                flex: 1 1 calc(50% - 6px) !important;
-                min-width: 120px !important;
+                width: 100% !important;
+                min-width: 0 !important;
                 padding: 10px 6px !important;
-                font-size: 0.84em !important;
+                font-size: 0.82em !important;
+                justify-content: center !important;
+                text-align: center !important;
             }
+            .btn-capture {
+                grid-column: 1 / -1 !important;
+                font-size: 0.95em !important;
+                padding: 12px 14px !important;
+            }
+            input[type="text"], input[type="password"], select, textarea {
+                font-size: 16px !important; /* Tránh bug phóng to màn hình trên iOS Safari */
+            }
+
             .booth-celeb-box {
                 padding: 14px 10px !important;
                 width: 100% !important;
@@ -2710,7 +2768,7 @@
             <!-- Khung xem Camera / Ảnh ghép -->
             <div class="camera-container" id="cameraBox">
                 <div class="camera-stage" id="cameraStage">
-                    <video id="cameraVideo" autoplay playsinline></video>
+                    <video id="cameraVideo" autoplay playsinline webkit-playsinline muted></video>
                     <img id="userPhotoPreview" alt="Ảnh của bạn">
                     <!-- Khung ảnh luôn hiển thị trực tiếp và bao trùm lên video hoặc ảnh -->
                     <img id="cameraFrameOverlay" src="" alt="Khung ảnh">
@@ -2741,19 +2799,31 @@
             <!-- Điều khiển Chụp / Tải ảnh / Toàn màn hình -->
             <div class="booth-controls">
                 <button type="button" class="btn-booth btn-upload" id="startCameraBtn">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h3l2-2h6l2 2h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm8 3a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6z"/></svg>
                     Mở Camera
                 </button>
+                <button type="button" class="btn-booth btn-flip" id="flipCameraBtn" style="display: none;" title="Đổi camera trước / sau">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4h-3.17L15 2H9L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-5 11.5V13H9v2.5L5.5 12 9 8.5V11h6V8.5l3.5 3.5-3.5 3.5z"/></svg>
+                    Đổi Camera
+                </button>
                 <button type="button" class="btn-booth btn-capture" id="captureBtn" style="display: none;">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="8"/></svg>
                     Chụp Ảnh (3s)
                 </button>
                 <button type="button" class="btn-booth btn-upload" id="uploadPhotoBtn">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
                     Tải Ảnh Từ Máy
                 </button>
+                <button type="button" class="btn-booth btn-native-cam" id="nativeCameraBtn" title="Chụp bằng máy ảnh điện thoại">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+                    Chụp Điện Thoại
+                </button>
                 <button type="button" class="btn-booth btn-fullscreen" id="fullscreenBtn" title="Bật chế độ chụp toàn màn hình">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
                     Toàn Màn Hình
                 </button>
                 <input type="file" id="boothFileInput" accept="image/*" style="display: none;">
+                <input type="file" id="nativeCameraInput" accept="image/*" capture="user" style="display: none;">
             </div>
 
             <!-- Canvas ẩn để xử lý đồ họa -->
@@ -5208,6 +5278,7 @@
         let loadedUserImg = null;
         let lastBoothPhoto = null;
         let boothStream = null;
+        let currentFacingMode = 'user'; // 'user' (front) hoặc 'environment' (rear)
 
         const cameraBox = document.getElementById('cameraBox');
         const cameraStage = document.getElementById('cameraStage');
@@ -5223,14 +5294,17 @@
         const frameSelector = document.getElementById('frameSelector');
         const boothCaptionInput = document.getElementById('boothCaptionInput');
         const startCameraBtn = document.getElementById('startCameraBtn');
+        const flipCameraBtn = document.getElementById('flipCameraBtn');
         const captureBtn = document.getElementById('captureBtn');
         const fsCaptureBtn = document.getElementById('fsCaptureBtn');
         const uploadPhotoBtn = document.getElementById('uploadPhotoBtn');
+        const nativeCameraBtn = document.getElementById('nativeCameraBtn');
         const fullscreenBtn = document.getElementById('fullscreenBtn');
         const fsCloseBtn = document.getElementById('fsCloseBtn');
         const fsPrevFrameBtn = document.getElementById('fsPrevFrameBtn');
         const fsNextFrameBtn = document.getElementById('fsNextFrameBtn');
         const boothFileInput = document.getElementById('boothFileInput');
+        const nativeCameraInput = document.getElementById('nativeCameraInput');
 
         const boothCanvas = document.getElementById('boothCanvas');
         const boothCtx = boothCanvas.getContext('2d');
@@ -5252,14 +5326,14 @@
                     <span class="frame-card-name">${frame.name}</span>
                 `;
                 card.addEventListener('click', () => {
-                    document.querySelectorAll('.frame-card').forEach(c => c.classList.remove('active'));
-                    card.classList.add('active');
                     currentFrameIndex = idx;
+                    document.querySelectorAll('.frame-card').forEach((c, i) => {
+                        c.classList.toggle('active', i === currentFrameIndex);
+                    });
                     applyFrameSelection();
                 });
                 frameSelector.appendChild(card);
             });
-            applyFrameSelection();
         }
 
         // Cập nhật khung ảnh hiển thị và chỉnh tỉ lệ khung ngắm
@@ -5282,31 +5356,33 @@
             }
         }
 
-        // Chế độ Toàn Màn Hình
-        function enterFullscreen() {
-            const elem = cameraBox;
-            if (!elem) return;
-            if (elem.requestFullscreen) {
-                elem.requestFullscreen();
-            } else if (elem.webkitRequestFullscreen) {
-                elem.webkitRequestFullscreen();
-            } else if (elem.msRequestFullscreen) {
-                elem.msRequestFullscreen();
-            }
+        // Toàn màn hình Photobooth
+        if (fullscreenBtn) {
+            fullscreenBtn.addEventListener('click', () => {
+                if (cameraBox.requestFullscreen) {
+                    cameraBox.requestFullscreen();
+                } else if (cameraBox.webkitRequestFullscreen) {
+                    cameraBox.webkitRequestFullscreen();
+                } else if (cameraBox.msRequestFullscreen) {
+                    cameraBox.msRequestFullscreen();
+                }
+            });
         }
 
-        function exitFullscreen() {
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-            } else if (document.webkitExitFullscreen) {
-                document.webkitExitFullscreen();
-            } else if (document.msExitFullscreen) {
-                document.msExitFullscreen();
-            }
+        function onFullscreenChange() {
+            const isFs = Boolean(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
+            cameraBox.classList.toggle('fullscreen-active', isFs);
+            fullscreenToolbar.style.display = isFs ? 'flex' : 'none';
         }
+        document.addEventListener('fullscreenchange', onFullscreenChange);
+        document.addEventListener('webkitfullscreenchange', onFullscreenChange);
 
-        if (fullscreenBtn) fullscreenBtn.addEventListener('click', enterFullscreen);
-        if (fsCloseBtn) fsCloseBtn.addEventListener('click', exitFullscreen);
+        if (fsCloseBtn) {
+            fsCloseBtn.addEventListener('click', () => {
+                if (document.exitFullscreen) document.exitFullscreen();
+                else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+            });
+        }
 
         if (fsPrevFrameBtn) {
             fsPrevFrameBtn.addEventListener('click', () => {
@@ -5349,18 +5425,48 @@
             }
             if (captureBtn) captureBtn.style.display = 'none';
             if (fsCaptureBtn) fsCaptureBtn.style.display = 'none';
-            if (startCameraBtn) startCameraBtn.textContent = 'Mở Camera';
+            if (flipCameraBtn) flipCameraBtn.style.display = 'none';
+            if (startCameraBtn) {
+                startCameraBtn.innerHTML = `
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h3l2-2h6l2 2h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm8 3a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6z"/></svg>
+                    Mở Camera
+                `;
+            }
         }
 
-        // Khởi động Camera
+        // Khởi động Camera linh hoạt & hỗ trợ cả trước và sau
         async function startCamera() {
             stopCamera();
             try {
-                boothStream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 960 } },
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    throw new Error('MEDIA_DEVICES_NOT_SUPPORTED');
+                }
+
+                let constraints = {
+                    video: {
+                        facingMode: currentFacingMode,
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    },
                     audio: false
-                });
+                };
+
+                try {
+                    boothStream = await navigator.mediaDevices.getUserMedia(constraints);
+                } catch(conErr) {
+                    console.warn('Fallback standard video constraint:', conErr);
+                    boothStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                }
+
                 cameraVideo.srcObject = boothStream;
+                cameraVideo.muted = true;
+
+                if (currentFacingMode === 'environment') {
+                    cameraVideo.classList.add('rear-camera');
+                } else {
+                    cameraVideo.classList.remove('rear-camera');
+                }
+
                 await cameraVideo.play();
                 cameraVideo.style.display = 'block';
                 userPhotoPreview.style.display = 'none';
@@ -5368,13 +5474,28 @@
                 cameraFrameOverlay.style.display = 'block';
                 captureBtn.style.display = 'inline-flex';
                 if (fsCaptureBtn) fsCaptureBtn.style.display = 'inline-flex';
-                startCameraBtn.textContent = 'Tắt Camera';
+                if (flipCameraBtn) flipCameraBtn.style.display = 'inline-flex';
+
+                startCameraBtn.innerHTML = `
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                    Tắt Camera
+                `;
 
                 applyFrameSelection();
             } catch (err) {
-                alert('Không thể mở Camera (hoặc trình duyệt chưa cấp quyền). Bạn có thể bấm "Tải Ảnh Từ Máy" để chọn ảnh có sẵn nhé!');
-                console.error('Lỗi Camera:', err);
+                console.error('Lỗi khởi động Camera:', err);
                 stopCamera();
+
+                const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+                if (isMobile && nativeCameraInput) {
+                    const wantDirect = confirm('Trình duyệt chưa thể mở trực tiếp webcam (thường do quyền riêng tư hoặc duyệt web nội bộ). Bạn có muốn mở trực tiếp Máy Ảnh của điện thoại để chụp ảnh không?');
+                    if (wantDirect) {
+                        nativeCameraInput.click();
+                        return;
+                    }
+                }
+
+                alert('Không thể mở Camera trực tiếp (hoặc bạn chưa cấp quyền máy ảnh). Bạn có thể bấm "Tải Ảnh Từ Máy" hoặc nút "Chụp Điện Thoại" để chụp ngay nhé!');
             }
         }
 
@@ -5394,10 +5515,18 @@
             });
         }
 
+        // Đổi camera trước / sau
+        if (flipCameraBtn) {
+            flipCameraBtn.addEventListener('click', async () => {
+                currentFacingMode = (currentFacingMode === 'user') ? 'environment' : 'user';
+                await startCamera();
+            });
+        }
+
         // Chụp ảnh với đếm ngược 3 giây
         function doCapture() {
             if (!cameraVideo || cameraVideo.readyState < 2 || cameraVideo.videoWidth === 0) {
-                alert('Camera đang khởi động, vui lòng thử lại sau giây lát!');
+                alert('Camera đang chuẩn bị khung hình, bạn hãy đợi 1 giây rồi bấm lại nhé!');
                 return;
             }
 
@@ -5421,13 +5550,21 @@
                     offCanvas.width = vw;
                     offCanvas.height = vh;
                     const offCtx = offCanvas.getContext('2d');
-                    offCtx.translate(vw, 0);
-                    offCtx.scale(-1, 1);
+
+                    // Nếu là camera trước thì lật gương selfie
+                    const isRear = cameraVideo.classList.contains('rear-camera');
+                    if (!isRear) {
+                        offCtx.translate(vw, 0);
+                        offCtx.scale(-1, 1);
+                    }
                     offCtx.drawImage(cameraVideo, 0, 0, vw, vh);
 
-                    // Giải phóng camera ngay sau khi chụp xong để không bị lỗi treo thiết bị
+                    // Giải phóng camera ngay sau khi chụp
                     stopCamera();
-                    startCameraBtn.textContent = 'Mở Camera Chụp Lại';
+                    startCameraBtn.innerHTML = `
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h3l2-2h6l2 2h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm8 3a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6z"/></svg>
+                        Mở Camera Chụp Lại
+                    `;
 
                     const snapImg = new Image();
                     snapImg.onload = () => {
@@ -5445,7 +5582,7 @@
 
                         earnFlower();
                     };
-                    snapImg.src = offCanvas.toDataURL('image/jpeg', 0.92);
+                    snapImg.src = offCanvas.toDataURL('image/jpeg', 0.95);
                 }
             }, 900);
         }
@@ -5453,35 +5590,46 @@
         if (captureBtn) captureBtn.addEventListener('click', doCapture);
         if (fsCaptureBtn) fsCaptureBtn.addEventListener('click', doCapture);
 
+        // Hàm xử lý file ảnh chung cho cả tải từ máy và chụp từ app máy ảnh điện thoại
+        function handleImageFile(file) {
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                const img = new Image();
+                img.onload = () => {
+                    loadedUserImg = img;
+                    userPhotoPreview.src = evt.target.result;
+                    userPhotoPreview.style.display = 'block';
+                    cameraPlaceholder.style.display = 'none';
+                    cameraFrameOverlay.style.display = 'block';
+
+                    stopCamera();
+                    renderPhotobooth();
+                    boothResultArea.style.display = 'block';
+                    const celebBox = document.getElementById('boothCelebBox');
+                    if (celebBox) celebBox.style.display = 'block';
+                    boothResultArea.scrollIntoView({ behavior: 'smooth' });
+
+                    earnFlower();
+                };
+                img.src = evt.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
         // Tải ảnh từ máy tính
         if (uploadPhotoBtn && boothFileInput) {
             uploadPhotoBtn.addEventListener('click', () => boothFileInput.click());
             boothFileInput.addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = (evt) => {
-                        const img = new Image();
-                        img.onload = () => {
-                            loadedUserImg = img;
-                            userPhotoPreview.src = evt.target.result;
-                            userPhotoPreview.style.display = 'block';
-                            cameraPlaceholder.style.display = 'none';
-                            cameraFrameOverlay.style.display = 'block';
+                handleImageFile(e.target.files && e.target.files[0]);
+            });
+        }
 
-                            stopCamera();
-                            renderPhotobooth();
-                            boothResultArea.style.display = 'block';
-                            const celebBox = document.getElementById('boothCelebBox');
-                            if (celebBox) celebBox.style.display = 'block';
-                            boothResultArea.scrollIntoView({ behavior: 'smooth' });
-
-                            earnFlower();
-                        };
-                        img.src = evt.target.result;
-                    };
-                    reader.readAsDataURL(file);
-                }
+        // Chụp trực tiếp bằng máy ảnh điện thoại
+        if (nativeCameraBtn && nativeCameraInput) {
+            nativeCameraBtn.addEventListener('click', () => nativeCameraInput.click());
+            nativeCameraInput.addEventListener('change', (e) => {
+                handleImageFile(e.target.files && e.target.files[0]);
             });
         }
 
@@ -5491,8 +5639,8 @@
             const frame = BOOTH_FRAMES[currentFrameIndex];
             if (!frame) return;
 
-            const targetW = frame.width * 2;
-            const targetH = frame.height * 2;
+            const targetW = (frame.width || 400) * 2;
+            const targetH = (frame.height || 450) * 2;
             boothCanvas.width = targetW;
             boothCanvas.height = targetH;
             boothCtx.clearRect(0, 0, targetW, targetH);
@@ -5500,26 +5648,47 @@
             drawUserImageBehindFrame(loadedUserImg, targetW, targetH);
 
             const frameImg = new Image();
-            frameImg.onload = () => {
+            frameImg.crossOrigin = "anonymous";
+            
+            const drawFinalAndExport = () => {
                 boothCtx.drawImage(frameImg, 0, 0, targetW, targetH);
 
                 const caption = boothCaptionInput ? boothCaptionInput.value.trim() : '';
                 if (caption) {
                     boothCtx.save();
-                    boothCtx.font = 'bold 24px "Dancing Script", cursive, sans-serif';
+                    const fontSize = Math.max(24, Math.round(targetW * 0.045));
+                    boothCtx.font = `bold ${fontSize}px "Dancing Script", cursive, sans-serif`;
                     boothCtx.fillStyle = '#4a3b32';
                     boothCtx.textAlign = 'center';
-                    boothCtx.shadowColor = 'rgba(255, 255, 255, 0.9)';
-                    boothCtx.shadowBlur = 6;
-                    boothCtx.fillText(caption, targetW / 2, targetH - 12);
+                    boothCtx.shadowColor = 'rgba(255, 255, 255, 0.95)';
+                    boothCtx.shadowBlur = 8;
+                    boothCtx.fillText(caption, targetW / 2, targetH - Math.round(targetH * 0.035));
                     boothCtx.restore();
                 }
 
-                const dataUrl = boothCanvas.toDataURL('image/jpeg', 0.92);
-                lastBoothPhoto = dataUrl;
-                boothPreviewImg.src = dataUrl;
-                if (attachFromBoothBtn) attachFromBoothBtn.style.display = 'inline-block';
+                try {
+                    const dataUrl = boothCanvas.toDataURL('image/jpeg', 0.95);
+                    lastBoothPhoto = dataUrl;
+                    boothPreviewImg.src = dataUrl;
+                    if (attachFromBoothBtn) attachFromBoothBtn.style.display = 'inline-block';
+                } catch(err) {
+                    console.error('Lỗi xuất ảnh canvas:', err);
+                }
             };
+
+            if (frameImg.complete && frameImg.naturalWidth > 0) {
+                drawFinalAndExport();
+            } else {
+                frameImg.onload = drawFinalAndExport;
+                frameImg.onerror = () => {
+                    console.warn('Không thể nạp ảnh khung, xuất ảnh gốc người dùng');
+                    try {
+                        const dataUrl = boothCanvas.toDataURL('image/jpeg', 0.95);
+                        lastBoothPhoto = dataUrl;
+                        boothPreviewImg.src = dataUrl;
+                    } catch(e) {}
+                };
+            }
             frameImg.src = frame.src;
         }
 
