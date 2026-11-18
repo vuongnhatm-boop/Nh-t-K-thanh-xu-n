@@ -1,0 +1,3915 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nhật Ký Thanh Xuân • Kỷ niệm học trò</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Patrick+Hand&family=Quicksand:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <script src="frames_data.js"></script>
+    <script src="flowers_data.js"></script>
+    <!-- GOOGLE FIREBASE SDK (COMPAT) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics-compat.js"></script>
+    <style>
+        :root {
+            --paper: #fdf8f0;
+            --ink: #4a3b32;
+            --ink-light: #7a6a5c;
+            --pink: #e8a0b4;
+            --pink-light: #f9d5e5;
+            --blue: #a0c4e8;
+            --blue-light: #d4e6f9;
+            --yellow: #f7e3b2;
+            --green: #b8d9c8;
+            --red: #d96459;
+            --white: #fffbf5;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            --font-hand: 'Patrick Hand', cursive;
+            --font-title: 'Dancing Script', cursive;
+            --font-body: 'Quicksand', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--paper);
+            background-image:
+                repeating-linear-gradient(0deg, transparent, transparent 29px, #e0d5c5 30px),
+                repeating-linear-gradient(90deg, transparent, transparent 29px, #e0d5c5 30px);
+            color: var(--ink);
+            font-family: var(--font-body);
+            overflow-x: hidden;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="%23d96459" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>'), auto;
+            position: relative;
+            scroll-behavior: smooth;
+        }
+
+        #petalsCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px 30px;
+            background: rgba(255, 251, 245, 0.85);
+            box-shadow: var(--shadow);
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+        }
+
+        .notebook-header {
+            text-align: center;
+            padding: 30px 0 20px;
+            border-bottom: 2px dashed var(--pink);
+            position: relative;
+        }
+
+        .notebook-header h1 {
+            font-family: var(--font-title);
+            font-size: 3.5em;
+            color: var(--red);
+            text-shadow: 1px 1px 0 var(--yellow);
+            margin-bottom: 5px;
+            animation: fadeInDown 1s ease;
+        }
+
+        .notebook-header .subtitle {
+            font-family: var(--font-hand);
+            font-size: 1.4em;
+            color: var(--ink-light);
+        }
+
+        .notebook-header::before {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 60px;
+            background: var(--pink-light);
+            border-radius: 50%;
+            opacity: 0.7;
+            filter: blur(15px);
+        }
+
+        section {
+            margin: 40px 0;
+            position: relative;
+        }
+
+        .section-title {
+            font-family: var(--font-title);
+            font-size: 2.8em;
+            color: var(--red);
+            margin-bottom: 25px;
+            text-align: center;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .section-title::before,
+        .section-title::after {
+            content: '—';
+            font-size: 0.8em;
+            opacity: 0.5;
+            color: var(--pink);
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 50px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 25px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(to bottom, var(--pink), var(--blue), var(--yellow));
+            border-radius: 3px;
+        }
+
+        .timeline-item {
+            margin-bottom: 35px;
+            position: relative;
+            background: var(--white);
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            border-left: 5px solid var(--pink);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .timeline-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -35px;
+            top: 20px;
+            width: 16px;
+            height: 16px;
+            background: var(--pink);
+            border: 3px solid var(--white);
+            border-radius: 50%;
+            box-shadow: 0 0 0 3px var(--pink);
+            z-index: 1;
+        }
+
+        .timeline-date {
+            font-family: var(--font-hand);
+            font-size: 1.2em;
+            color: var(--red);
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .timeline-text {
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+
+        .friends-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 25px;
+        }
+
+        .friend-card {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 25px 15px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--pink-light);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .friend-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--pink);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .friend-avatar {
+            font-size: 4em;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .friend-name {
+            font-family: var(--font-hand);
+            font-size: 1.6em;
+            color: var(--ink);
+        }
+
+        .friend-note {
+            font-size: 0.95em;
+            color: var(--ink-light);
+            font-style: italic;
+            margin-top: 10px;
+            border-top: 1px dashed var(--pink);
+            padding-top: 10px;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 30px 0;
+            font-family: var(--font-hand);
+            color: var(--ink-light);
+            border-top: 1px dashed var(--blue);
+            margin-top: 40px;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+            100% { transform: translateY(0px); }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+
+            .notebook-header h1 {
+                font-size: 2.5em;
+            }
+
+            .timeline {
+                padding-left: 35px;
+            }
+
+            .timeline-item::before {
+                left: -28px;
+            }
+        }
+
+        /* Thêm CSS cho Tùy Bút */
+        .memory-form {
+            background: var(--white);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            border: 1px dashed var(--pink);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--ink);
+        }
+        .form-group input[type="text"],
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--pink-light);
+            border-radius: 8px;
+            font-family: var(--font-body);
+            font-size: 1em;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .form-group input[type="text"]:focus,
+        .form-group textarea:focus {
+            border-color: var(--pink);
+        }
+        .radio-group {
+            display: flex;
+            gap: 20px;
+        }
+        .submit-btn {
+            background: var(--pink);
+            color: var(--white);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-family: var(--font-body);
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s, background 0.3s;
+            display: block;
+            margin: 0 auto;
+        }
+        .submit-btn:hover {
+            transform: scale(1.05);
+            background: var(--red);
+        }
+        .filter-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .tab-btn {
+            background: var(--white);
+            border: 1px solid var(--pink-light);
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: var(--font-body);
+            color: var(--ink);
+            transition: all 0.3s;
+        }
+        .tab-btn.active, .tab-btn:hover {
+            background: var(--pink-light);
+            border-color: var(--pink);
+            color: var(--ink);
+            font-weight: 600;
+        }
+        .role-tag {
+            display: inline-block;
+            font-size: 0.8em;
+            padding: 3px 8px;
+            border-radius: 12px;
+            margin-left: 10px;
+            font-weight: 500;
+        }
+        .role-hoc-sinh {
+            background: var(--blue-light);
+            color: #2b5c8f;
+        }
+        .role-cuu-hoc-sinh {
+            background: var(--yellow);
+            color: #8c7128;
+        }
+        .timeline-author {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .timeline-author-name {
+            font-family: var(--font-hand);
+            font-size: 1.4em;
+            color: var(--red);
+            font-weight: 700;
+        }
+        .timeline-date-time {
+            font-size: 0.85em;
+            color: var(--ink-light);
+            margin-bottom: 10px;
+            display: block;
+        }
+        /* Thanh Điều Hướng Nhanh */
+        .nav-bar {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0 30px;
+        }
+        .nav-btn {
+            background: var(--white);
+            border: 2px solid var(--pink-light);
+            color: var(--ink);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-family: var(--font-body);
+            font-size: 0.95em;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .nav-btn:hover {
+            background: var(--pink-light);
+            border-color: var(--pink);
+            color: var(--red);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(232, 160, 180, 0.3);
+        }
+
+        /* PHOTOBOOTH CLB DESIGN */
+        .photobooth-section {
+            background: var(--white);
+            border: 2px dashed var(--pink);
+            border-radius: 18px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+            margin-bottom: 40px;
+        }
+        .camera-container {
+            position: relative;
+            max-width: 480px;
+            margin: 0 auto 20px;
+            border-radius: 15px;
+            overflow: hidden;
+            background: #232323;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            aspect-ratio: 4/3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: aspect-ratio 0.3s ease;
+        }
+        #cameraVideo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1);
+            display: none;
+        }
+        #cameraFrameOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            pointer-events: none;
+            z-index: 5;
+            display: none;
+        }
+        .camera-placeholder {
+            color: #d1d5db;
+            text-align: center;
+            padding: 20px;
+            font-size: 1.05em;
+        }
+        .countdown-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 5.5em;
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 0 0 25px rgba(232, 160, 180, 0.9), 0 0 10px rgba(0,0,0,0.5);
+            pointer-events: none;
+            display: none;
+            z-index: 10;
+        }
+        .flash-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            z-index: 11;
+        }
+        .frame-selector {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .frame-card {
+            background: var(--white);
+            border: 2px solid var(--pink-light);
+            border-radius: 12px;
+            padding: 8px 14px;
+            font-family: var(--font-body);
+            font-size: 0.9em;
+            font-weight: 600;
+            border-radius: 14px;
+            padding: 8px 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: var(--ink);
+            text-align: center;
+            width: 125px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            user-select: none;
+        }
+        .frame-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--pink);
+            color: var(--red);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(232, 160, 180, 0.3);
+        }
+        .frame-card.active {
+            border-color: var(--red);
+            background: #fff0f3;
+            transform: translateY(-3px) scale(1.04);
+            box-shadow: 0 6px 18px rgba(217, 100, 89, 0.3);
+        }
+        .frame-card-thumb {
+            width: 82px;
+            height: 70px;
+            object-fit: contain;
+            border-radius: 8px;
+            background: #faf8f5;
+            margin-bottom: 6px;
+            border: 1px dashed var(--pink-light);
+            padding: 2px;
+            transition: transform 0.2s;
+        }
+        .frame-card:hover .frame-card-thumb {
+            transform: scale(1.05);
+        }
+        .frame-card-name {
+            font-size: 0.8em;
+            font-weight: 600;
+            color: var(--ink);
+            line-height: 1.25;
+        }
+        .booth-controls {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .btn-booth {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 25px;
+            border: none;
+            font-family: var(--font-body);
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-capture {
+            background: linear-gradient(135deg, var(--pink), var(--red));
+            color: white;
+            box-shadow: 0 4px 15px rgba(217, 100, 89, 0.3);
+        }
+        .btn-capture:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(217, 100, 89, 0.4);
+        }
+        .btn-upload {
+            background: var(--blue-light);
+            color: #2b5c8f;
+        }
+        .btn-upload:hover {
+            background: var(--blue);
+            color: white;
+            transform: translateY(-2px);
+        }
+        .booth-result-area {
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 2px dashed var(--pink-light);
+            text-align: center;
+            display: none;
+        }
+        #boothCanvas {
+            display: none;
+        }
+        #boothPreviewImg {
+            max-width: 100%;
+            max-height: 480px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            margin-bottom: 20px;
+            border: 2px solid var(--pink-light);
+        }
+        .result-btn-group {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .btn-download {
+            background: #2e7d32;
+            color: white;
+        }
+        .btn-download:hover {
+            background: #1b5e20;
+            transform: scale(1.05);
+        }
+        .btn-facebook {
+            background: #1877f2;
+            color: white;
+        }
+        .btn-facebook:hover {
+            background: #0d65d9;
+            transform: scale(1.05);
+        }
+        .btn-post-web {
+            background: var(--pink);
+            color: white;
+        }
+        .btn-post-web:hover {
+            background: var(--red);
+            transform: scale(1.05);
+        }
+
+        /* TRI ÂN THẦY CÔ & TẶNG HOA ONLINE */
+        .teacher-section {
+            background: var(--white);
+            padding: 25px;
+            border-radius: 18px;
+            box-shadow: var(--shadow);
+            border: 2px dashed var(--yellow);
+            margin-bottom: 40px;
+        }
+        .flower-garden-banner {
+            background: linear-gradient(135deg, #fffbee, #fff2f5);
+            border: 1px dashed var(--yellow);
+            border-radius: 15px;
+            padding: 18px 20px;
+            text-align: center;
+            margin-bottom: 22px;
+            color: var(--ink);
+        }
+        .flower-garden-title {
+            font-family: var(--font-hand);
+            font-size: 1.35em;
+            color: var(--ink);
+            margin-bottom: 6px;
+        }
+        .flower-garden-count {
+            font-family: var(--font-title);
+            font-size: 1.6em;
+            color: var(--red);
+            font-weight: bold;
+            margin: 0 4px;
+        }
+        .user-flower-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+            padding: 8px 18px;
+            border-radius: 30px;
+            border: 1px solid var(--pink);
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 4px 12px rgba(232, 160, 180, 0.25);
+            font-size: 0.95em;
+            font-family: var(--font-body);
+        }
+        .user-flower-badge.has-flowers {
+            border-color: #2e7d32;
+            background: #f1f8e9;
+            color: #1b5e20;
+        }
+        .user-flower-badge.empty-flowers {
+            border-color: #d96459;
+            background: #fff5f5;
+            color: #c0392b;
+        }
+        .btn-earn-flower {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 14px;
+            border-radius: 15px;
+            background: var(--pink);
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.88em;
+            transition: all 0.2s;
+        }
+        .btn-earn-flower:hover {
+            background: var(--red);
+            transform: scale(1.05);
+        }
+        .flower-picker {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+        .flower-card {
+            border: 2px solid var(--pink-light);
+            border-radius: 14px;
+            padding: 10px 6px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #fffdf9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            user-select: none;
+        }
+        .flower-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--pink);
+            box-shadow: 0 6px 15px rgba(232, 160, 180, 0.3);
+        }
+        .flower-card.selected {
+            border-color: var(--red);
+            background: #fff0f3;
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 8px 20px rgba(217, 100, 89, 0.35);
+        }
+        .flower-card-img {
+            width: 85px;
+            height: 110px;
+            object-fit: contain;
+            margin-bottom: 6px;
+            transition: transform 0.2s;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
+        }
+        .flower-card:hover .flower-card-img {
+            transform: scale(1.08);
+        }
+        .flower-card-name {
+            font-size: 0.82em;
+            font-weight: 700;
+            color: var(--ink);
+            line-height: 1.25;
+            margin-bottom: 4px;
+        }
+        .flower-card-tag {
+            font-size: 0.72em;
+            background: #fff3cd;
+            color: #856404;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+        .teacher-badge {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+            font-size: 0.82em;
+            padding: 3px 10px;
+            border-radius: 12px;
+            margin-left: 8px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .flower-gift-badge {
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #ffcdd2;
+            font-size: 0.82em;
+            padding: 3px 10px;
+            border-radius: 12px;
+            margin-left: 8px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .tribute-flower-thumb {
+            width: 75px;
+            height: 95px;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.12));
+            flex-shrink: 0;
+            border-radius: 6px;
+        }
+
+        /* ĐÍNH KÈM HÌNH ẢNH TRONG BÀI VIẾT */
+        .image-attach-area {
+            margin-top: 10px;
+            padding: 12px;
+            background: var(--paper);
+            border: 1px dashed var(--pink-light);
+            border-radius: 10px;
+        }
+        .image-preview-box {
+            position: relative;
+            display: inline-block;
+            margin-top: 10px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--pink);
+            max-width: 220px;
+        }
+        .image-preview-box img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .btn-remove-img {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(217, 100, 89, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+        .btn-remove-img:hover {
+            transform: scale(1.15);
+        }
+        .timeline-image {
+            max-width: 100%;
+            max-height: 420px;
+            border-radius: 10px;
+            margin-top: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            border: 1px solid var(--pink-light);
+            cursor: zoom-in;
+            transition: transform 0.3s;
+        }
+        .timeline-image:hover {
+            transform: scale(1.015);
+        }
+
+        /* LIGHTBOX PHÓNG TO ẢNH */
+        .lightbox-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.88);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            cursor: zoom-out;
+            backdrop-filter: blur(4px);
+        }
+        .lightbox-modal img {
+            max-width: 92%;
+            max-height: 90vh;
+            border-radius: 12px;
+            box-shadow: 0 0 35px rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* Playlist Widget CSS */
+        .music-widget {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 320px;
+            background: rgba(255, 251, 245, 0.95);
+            border: 2px dashed var(--pink);
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            z-index: 100;
+            backdrop-filter: blur(5px);
+            font-family: var(--font-body);
+            transition: transform 0.3s;
+        }
+
+        .music-widget:hover {
+            transform: translateY(-5px);
+        }
+
+        .music-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--red);
+            font-family: var(--font-title);
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            border-bottom: 1px dashed var(--pink-light);
+            padding-bottom: 10px;
+        }
+
+        .music-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .music-btn {
+            background: var(--white);
+            border: 2px solid var(--pink-light);
+            color: var(--pink);
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 4px 10px rgba(232, 160, 180, 0.15);
+        }
+
+        .music-btn:hover {
+            background: var(--pink-light);
+            color: var(--red);
+            border-color: var(--pink);
+            transform: scale(1.1) translateY(-2px);
+            box-shadow: 0 6px 15px rgba(232, 160, 180, 0.3);
+        }
+
+        #playPauseBtn {
+            width: 55px;
+            height: 55px;
+            background: linear-gradient(135deg, var(--pink), #ff8fa3);
+            color: white;
+            border: none;
+            box-shadow: 0 6px 15px rgba(232, 160, 180, 0.4);
+        }
+
+        #playPauseBtn:hover {
+            background: linear-gradient(135deg, #ff8fa3, var(--pink));
+            color: white;
+            border: none;
+            transform: scale(1.15) translateY(-3px);
+            box-shadow: 0 8px 20px rgba(232, 160, 180, 0.6);
+        }
+
+        .playlist {
+            list-style: none;
+            max-height: 120px;
+            overflow-y: auto;
+            font-size: 0.95em;
+            border-top: 1px dashed var(--pink-light);
+            padding-top: 10px;
+        }
+
+        .playlist::-webkit-scrollbar {
+            width: 5px;
+        }
+        .playlist::-webkit-scrollbar-thumb {
+            background: var(--pink-light);
+            border-radius: 5px;
+        }
+
+        .playlist li {
+            padding: 8px 10px;
+            cursor: pointer;
+            border-radius: 8px;
+            margin-bottom: 4px;
+            transition: background 0.2s;
+            color: var(--ink-light);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .playlist li:hover {
+            background: var(--pink-light);
+            color: var(--ink);
+        }
+
+        .playlist li.active {
+            background: var(--pink);
+            color: white;
+            font-weight: bold;
+        }
+        
+        .spin-disk {
+            animation: spin 4s linear infinite;
+        }
+        
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .music-widget {
+                bottom: 15px;
+                right: 15px;
+                width: 250px;
+                padding: 10px;
+            }
+        }
+    
+        /* NÚT VÀ MODAL ĐĂNG NHẬP FIREBASE */
+        .nav-btn-auth {
+            background: #fff5f7;
+            border-color: var(--pink);
+            color: #b54b6d;
+        }
+        .nav-btn-auth:hover {
+            background: var(--pink-light);
+            border-color: var(--pink);
+            transform: translateY(-2px);
+        }
+        .nav-btn-auth.logged-in {
+            background: #eef8f2;
+            border-color: var(--green);
+            color: #276749;
+        }
+
+        .auth-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.65);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            backdrop-filter: blur(4px);
+            padding: 20px;
+        }
+        .auth-modal-card {
+            background: var(--paper);
+            border: 3px solid var(--pink);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 440px;
+            padding: 28px 24px;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.25);
+            position: relative;
+            box-sizing: border-box;
+            font-family: var(--font-body);
+            animation: modalFadeIn 0.3s ease;
+        }
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(-15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .auth-modal-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .auth-modal-title {
+            font-family: var(--font-hand);
+            font-size: 2.1em;
+            color: var(--red);
+            margin-bottom: 4px;
+        }
+        .auth-modal-subtitle {
+            font-size: 0.9em;
+            color: var(--ink-light);
+            font-style: italic;
+        }
+        .auth-close-btn {
+            position: absolute;
+            top: 14px;
+            right: 18px;
+            background: none;
+            border: none;
+            font-size: 1.6em;
+            cursor: pointer;
+            color: var(--ink-light);
+            line-height: 1;
+            transition: color 0.2s;
+        }
+        .auth-close-btn:hover {
+            color: var(--red);
+        }
+        .auth-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 18px;
+            border-bottom: 2px solid var(--pink-light);
+            padding-bottom: 6px;
+        }
+        .auth-tab-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            padding: 8px 6px;
+            font-size: 0.9em;
+            font-weight: 600;
+            color: var(--ink-light);
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+            font-family: var(--font-body);
+        }
+        .auth-tab-btn.active {
+            background: var(--pink-light);
+            color: var(--ink);
+        }
+        .auth-form-group {
+            margin-bottom: 14px;
+        }
+        .auth-form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            font-size: 0.9em;
+            color: var(--ink);
+        }
+        .auth-form-group input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid #ecdcd1;
+            border-radius: 10px;
+            font-size: 0.95em;
+            background: var(--white);
+            box-sizing: border-box;
+            outline: none;
+            font-family: var(--font-body);
+            transition: border-color 0.2s;
+        }
+        .auth-form-group input:focus {
+            border-color: var(--pink);
+        }
+        .auth-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 16px;
+        }
+        .btn-auth-primary {
+            background: var(--pink);
+            color: white;
+            border: none;
+            padding: 11px;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 1em;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(232, 160, 180, 0.4);
+            transition: all 0.2s;
+            font-family: var(--font-body);
+        }
+        .btn-auth-primary:hover {
+            background: var(--red);
+            transform: translateY(-2px);
+        }
+        .btn-auth-secondary {
+            background: transparent;
+            color: var(--ink-light);
+            border: 1px dashed var(--ink-light);
+            padding: 8px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 0.88em;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: var(--font-body);
+        }
+        .btn-auth-secondary:hover {
+            border-color: var(--pink);
+            color: var(--red);
+        }
+        .auth-status-box {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 12px;
+            padding: 14px;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+    
+        /* THANH CÔNG CỤ TOÀN MÀN HÌNH */
+        .fullscreen-toolbar {
+            display: none;
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.75);
+            padding: 10px 16px;
+            border-radius: 30px;
+            gap: 10px;
+            align-items: center;
+            z-index: 50;
+            backdrop-filter: blur(8px);
+        }
+        .camera-container.is-fullscreen .fullscreen-toolbar {
+            display: flex;
+        }
+        .fs-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            color: #fff;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: var(--font-body);
+            transition: all 0.2s;
+        }
+        .fs-btn:hover {
+            background: rgba(255, 255, 255, 0.35);
+        }
+        .fs-btn.fs-snap {
+            background: var(--pink);
+            border-color: var(--pink);
+        }
+        .fs-btn.fs-close {
+            background: rgba(217, 100, 89, 0.6);
+            border-color: rgba(217, 100, 89, 0.8);
+        }
+        .fs-frame-label {
+            color: #fff;
+            font-size: 0.85em;
+            font-weight: bold;
+            padding: 0 4px;
+        }
+
+    
+        /* MÀN HÌNH CHÀO MỪNG / ĐĂNG NHẬP BẮT BUỘC (GATEKEEPER) */
+        .gate-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(74, 59, 50, 0.75);
+            backdrop-filter: blur(8px);
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .gate-card {
+            background: #fffdf9;
+            border: 3px solid var(--pink);
+            border-radius: 24px;
+            max-width: 480px;
+            width: 100%;
+            padding: 32px 28px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+            text-align: center;
+            position: relative;
+            animation: gatePopIn 0.35s ease;
+        }
+        @keyframes gatePopIn {
+            from { opacity: 0; transform: scale(0.92) translateY(15px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .gate-icon {
+            margin-bottom: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 68px;
+            height: 68px;
+            background: #ffe8ee;
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(232, 160, 180, 0.35);
+        }
+        .gate-title {
+            font-family: var(--font-title);
+            font-size: 2.8em;
+            color: var(--red);
+            margin-bottom: 2px;
+            text-shadow: 1px 1px 0 var(--yellow);
+        }
+        .gate-subtitle {
+            font-family: var(--font-hand);
+            font-size: 1.25em;
+            color: var(--ink-light);
+            margin-bottom: 12px;
+        }
+        .gate-desc {
+            font-size: 0.92em;
+            color: var(--ink);
+            line-height: 1.5;
+            margin-bottom: 22px;
+            background: #fff8f0;
+            padding: 10px 14px;
+            border-radius: 12px;
+            border: 1px dashed var(--yellow);
+        }
+        .gate-input-group {
+            text-align: left;
+            margin-bottom: 16px;
+        }
+        .gate-input-group label {
+            display: block;
+            font-weight: 700;
+            font-size: 0.9em;
+            color: var(--ink);
+            margin-bottom: 6px;
+        }
+        .gate-input-group input,
+        .gate-input-group select {
+            width: 100%;
+            padding: 11px 14px;
+            border: 2px solid #ecdcd1;
+            border-radius: 12px;
+            font-size: 0.95em;
+            background: white;
+            font-family: var(--font-body);
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .gate-input-group input:focus,
+        .gate-input-group select:focus {
+            border-color: var(--pink);
+        }
+        .gate-roles {
+            display: flex;
+            gap: 10px;
+        }
+        .gate-role-item {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #fff8f9;
+            border: 1px solid var(--pink-light);
+            padding: 8px 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.88em;
+            font-weight: 600;
+            color: var(--ink);
+            transition: all 0.2s;
+        }
+        .gate-role-item:hover {
+            border-color: var(--pink);
+            background: #ffeef2;
+        }
+        .btn-gate-enter {
+            width: 100%;
+            background: linear-gradient(135deg, var(--pink), #ff758f);
+            color: white;
+            border: none;
+            padding: 13px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 6px 18px rgba(255, 117, 143, 0.4);
+            transition: all 0.2s;
+            font-family: var(--font-body);
+            margin-top: 10px;
+        }
+        .btn-gate-enter:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 22px rgba(255, 117, 143, 0.55);
+        }
+        .gate-admin-link {
+            margin-top: 16px;
+            font-size: 0.88em;
+        }
+        .gate-admin-link a {
+            color: var(--ink-light);
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        .gate-admin-link a:hover {
+            color: var(--pink);
+        }
+
+        /* THANH THÔNG TIN NGƯỜI DÙNG ĐĂNG NHẬP */
+        .user-greeting-bar {
+            background: #fffaf0;
+            border: 1px dashed var(--pink);
+            border-radius: 16px;
+            padding: 10px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0 20px;
+            font-size: 0.92em;
+        }
+        .greeting-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--ink);
+        }
+        .user-avatar-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #22c55e;
+            display: inline-block;
+        }
+        .greeting-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .greeting-flower-pill {
+            background: #ffe8ee;
+            color: var(--red);
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 12px;
+            border: 1px solid var(--pink-light);
+        }
+        .btn-greeting-action {
+            background: white;
+            border: 1px solid var(--pink-light);
+            color: var(--ink-light);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: var(--font-body);
+        }
+        .btn-greeting-action:hover {
+            border-color: var(--pink);
+            color: var(--red);
+        }
+
+        /* THANH ĐIỀU HƯỚNG TỪNG KHU VỰC (TABS) */
+        .zone-tab-bar {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0 30px;
+            border-bottom: 2px dashed var(--pink-light);
+            padding-bottom: 16px;
+        }
+        .zone-tab-btn {
+            background: var(--white);
+            border: 2px solid var(--pink-light);
+            color: var(--ink);
+            padding: 10px 18px;
+            border-radius: 25px;
+            font-family: var(--font-body);
+            font-size: 0.95em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .zone-tab-btn:hover {
+            border-color: var(--pink);
+            color: var(--red);
+            transform: translateY(-2px);
+        }
+        .zone-tab-btn.active {
+            background: linear-gradient(135deg, var(--pink), #ff758f);
+            border-color: #ff758f;
+            color: white;
+            box-shadow: 0 4px 14px rgba(255, 117, 143, 0.4);
+        }
+        .zone-tab-btn.active svg {
+            fill: white;
+        }
+        .tab-flower-indicator {
+            background: white;
+            color: var(--red);
+            font-size: 0.78em;
+            padding: 2px 7px;
+            border-radius: 10px;
+            font-weight: 800;
+        }
+        .zone-tab-btn.active .tab-flower-indicator {
+            background: #fff0f3;
+            color: #d90429;
+        }
+
+        /* CÁC PHÂN KHU (ZONE SECTIONS) */
+        .app-zone {
+            display: none;
+            animation: zoneFadeIn 0.3s ease;
+        }
+        .app-zone.active {
+            display: block;
+        }
+
+        /* THÔNG BÁO CHÚC MỪNG TRONG PHOTOBOOTH KHI CHỤP XONG */
+        .booth-celeb-box {
+            background: linear-gradient(135deg, #fff7ed, #fef2f2);
+            border: 2px dashed #f87171;
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            margin: 20px 0;
+            box-shadow: 0 6px 20px rgba(248, 113, 113, 0.15);
+        }
+        .celeb-title {
+            font-family: var(--font-title);
+            font-size: 2.2em;
+            color: var(--red);
+            margin-bottom: 6px;
+        }
+        .celeb-badge {
+            display: inline-block;
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 800;
+            font-size: 0.95em;
+            margin-bottom: 8px;
+            border: 1px solid #fca5a5;
+        }
+        .celeb-desc {
+            font-size: 0.95em;
+            color: var(--ink);
+            margin-bottom: 16px;
+            font-style: italic;
+        }
+        .celeb-btn-group {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .btn-celeb-action {
+            padding: 10px 18px;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 0.92em;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: var(--font-body);
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-celeb-gift {
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
+            color: white;
+            box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35);
+        }
+        .btn-celeb-gift:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(239, 68, 68, 0.5);
+        }
+        .btn-celeb-post {
+            background: var(--pink);
+            color: white;
+            box-shadow: 0 4px 12px rgba(232, 160, 180, 0.35);
+        }
+        .btn-celeb-post:hover {
+            background: var(--red);
+            transform: translateY(-2px);
+        }
+        .btn-celeb-download {
+            background: white;
+            border: 2px solid var(--pink-light);
+            color: var(--ink);
+        }
+        .btn-celeb-download:hover {
+            border-color: var(--pink);
+            color: var(--red);
+            transform: translateY(-2px);
+        }
+
+        /* DANH SÁCH THẦY CÔ CUTE (TEACHER CARDS GRID) */
+        .teachers-section-card {
+            background: #fffdf9;
+            border: 2px solid var(--yellow);
+            border-radius: 22px;
+            padding: 24px 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+        }
+        .teachers-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .teachers-header-title {
+            font-family: var(--font-title);
+            font-size: 2.3em;
+            color: var(--red);
+            margin-bottom: 4px;
+        }
+        .teachers-header-subtitle {
+            font-size: 0.92em;
+            color: var(--ink-light);
+            font-style: italic;
+        }
+        .teachers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 16px;
+        }
+        .teacher-cute-card {
+            background: white;
+            border-radius: 18px;
+            padding: 18px 14px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+            border: 2px solid #f1f5f9;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .teacher-cute-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(232, 160, 180, 0.25);
+            border-color: var(--pink);
+        }
+        .teacher-avatar-circle {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            margin: 0 auto 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .teacher-card-name {
+            font-family: var(--font-hand);
+            font-size: 1.45em;
+            font-weight: 700;
+            color: var(--ink);
+            margin-bottom: 4px;
+        }
+        .teacher-subject-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .teacher-quote-box {
+            font-size: 0.84em;
+            color: var(--ink-light);
+            line-height: 1.45;
+            margin-bottom: 12px;
+            font-style: italic;
+            min-height: 48px;
+        }
+        .teacher-flower-stat {
+            font-size: 0.82em;
+            color: #b45309;
+            background: #fffbeb;
+            padding: 4px 8px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-weight: 600;
+            border: 1px solid #fef3c7;
+        }
+        .btn-gift-teacher-card {
+            width: 100%;
+            background: linear-gradient(135deg, #ff8fa3, var(--red));
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 0.88em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: var(--font-body);
+            box-shadow: 0 3px 10px rgba(232, 160, 180, 0.35);
+        }
+        .btn-gift-teacher-card:hover {
+            transform: scale(1.03);
+            box-shadow: 0 5px 14px rgba(232, 160, 180, 0.5);
+        }
+        .teacher-target-alert {
+            background: #fdf2f8;
+            border: 1px dashed var(--pink);
+            border-radius: 12px;
+            padding: 10px 14px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .target-teacher-name-highlight {
+            font-weight: 700;
+            color: var(--red);
+        }
+
+    </style>
+</head>
+
+<body>
+    <canvas id="petalsCanvas"></canvas>
+
+    <!-- MÀN HÌNH CHÀO MỪNG & ĐĂNG NHẬP BẮT BUỘC TRƯỚC KHI VÀO -->
+    <div id="gatekeeperScreen" class="gate-overlay">
+        <div class="gate-card">
+            <div class="gate-icon">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="var(--red)">
+                    <path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z"/>
+                </svg>
+            </div>
+            <h2 class="gate-title">Nhật Ký Thanh Xuân</h2>
+            <p class="gate-subtitle">"Một thời áo trắng, một đời nhớ thương"</p>
+            <p class="gate-desc">Chào mừng bạn trở về với những năm tháng rực rỡ dưới mái trường xưa. Vui lòng nhập thông tin để cùng lưu bút và gửi hoa tri ân Thầy Cô nhé!</p>
+
+            <form id="gateForm">
+                <div class="gate-input-group">
+                    <label>Họ và tên của bạn:</label>
+                    <input type="text" id="gateName" placeholder="Nhập họ và tên hoặc biệt danh..." required>
+                </div>
+                <div class="gate-input-group">
+                    <label>Niên khóa / Lớp:</label>
+                    <select id="gateBatch" required>
+                        <option value="" disabled selected>Chọn niên khóa...</option>
+                    </select>
+                </div>
+                <div class="gate-input-group">
+                    <label>Bạn là:</label>
+                    <div class="gate-roles">
+                        <label class="gate-role-item">
+                            <input type="radio" name="gateRole" value="hoc-sinh" checked>
+                            <span>Học sinh</span>
+                        </label>
+                        <label class="gate-role-item">
+                            <input type="radio" name="gateRole" value="cuu-hoc-sinh">
+                            <span>Cựu học sinh</span>
+                        </label>
+                        <label class="gate-role-item">
+                            <input type="radio" name="gateRole" value="thay-co">
+                            <span>Thầy Cô</span>
+                        </label>
+                    </div>
+                </div>
+                <button type="submit" class="btn-gate-enter">Bước Vào Mái Trường</button>
+                <div class="gate-admin-link">
+                    <a href="javascript:void(0)" id="gateAdminTrigger">Dành cho Quản trị viên (Firebase Admin)</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <div class="container">
+        <header class="notebook-header">
+            <h1>Nhật Ký Thanh Xuân</h1>
+            <p class="subtitle">“Một thời áo trắng, một đời nhớ thương”</p>
+        </header>
+
+        <!-- Thanh Điều Hướng Nhanh -->
+        <!-- Thanh Trạng Thái Học Trò Đăng Nhập -->
+        <div class="user-greeting-bar" id="userGreetingBar">
+            <div class="greeting-left">
+                <span class="user-avatar-dot"></span>
+                <span>Học trò: <strong id="greetingUserName">Học sinh</strong> (<span id="greetingUserBatch">Niên khóa</span>)</span>
+            </div>
+            <div class="greeting-right">
+                <span class="greeting-flower-pill" id="greetingFlowerPill">0 bông hoa</span>
+                <button type="button" class="btn-greeting-action" id="btnSwitchUser">Đổi thông tin</button>
+                <button type="button" class="btn-greeting-action" id="openAuthModalBtn">Quản Trị</button>
+            </div>
+        </div>
+
+        <!-- Thanh Điều Hướng Các Phân Khu (Tabs) -->
+        <nav class="zone-tab-bar" id="zoneTabBar">
+            <button type="button" class="zone-tab-btn active" data-zone="photoboothSection">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                Chụp Hình
+            </button>
+            <button type="button" class="zone-tab-btn" data-zone="teacherSection">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z"/></svg>
+                Tri Ân Thầy Cô
+                <span class="tab-flower-indicator" id="tabFlowerIndicator">0 hoa</span>
+            </button>
+            <button type="button" class="zone-tab-btn" data-zone="writeSection">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                Viết Tùy Bút
+            </button>
+            <button type="button" class="zone-tab-btn" data-zone="timelineSection">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg>
+                Bảng Kỷ Niệm
+            </button>
+        </nav>
+
+        <!-- KHU VỰC CHỤP HÌNH -->
+        <section id="photoboothSection" class="photobooth-section app-zone active">
+            <div class="section-title">Chụp Hình</div>
+            <p style="text-align: center; color: var(--ink-light); margin-bottom: 20px; font-style: italic;">
+                Lưu giữ nụ cười và khoảnh khắc thanh xuân cùng các khung ảnh tri ân Thầy Cô!
+            </p>
+
+            <!-- Bộ chọn khung -->
+            <div style="text-align: center; margin-bottom: 12px; font-weight: 600; color: var(--ink);">
+                Chọn Khung Ảnh Để Chụp:
+            </div>
+            <div class="frame-selector" id="frameSelector">
+                <!-- Javascript sẽ tự động điền danh sách khung từ BOOTH_FRAMES -->
+            </div>
+
+            <!-- Tùy chỉnh lời nhắn trên ảnh -->
+            <div style="max-width: 520px; margin: 0 auto 18px; text-align: center;">
+                <input type="text" id="boothCaptionInput" placeholder="Nhập dòng chữ kỷ niệm trên ảnh (vd: A3 K33 Mãi Đỉnh)..." 
+                       style="width: 100%; padding: 10px 18px; border: 1px solid var(--pink-light); border-radius: 20px; font-family: var(--font-body); outline: none; font-size: 0.95em;">
+            </div>
+
+            <!-- Khung xem Camera / Ảnh ghép -->
+            <div class="camera-container" id="cameraBox">
+                <div class="camera-stage" id="cameraStage">
+                    <video id="cameraVideo" autoplay playsinline></video>
+                    <img id="userPhotoPreview" alt="Ảnh của bạn">
+                    <!-- Khung ảnh luôn hiển thị trực tiếp và bao trùm lên video hoặc ảnh -->
+                    <img id="cameraFrameOverlay" src="" alt="Khung ảnh">
+                    <div class="camera-placeholder" id="cameraPlaceholder">
+                        <svg width="44" height="44" viewBox="0 0 24 24" fill="currentColor" style="opacity: 0.7; margin-bottom: 8px;"><path d="M4 4h3l2-2h6l2 2h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm8 3a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6z"/></svg>
+                        <div style="font-weight: 600; margin-bottom: 4px;">Khung Đã Sẵn Sàng</div>
+                        <div style="font-size: 0.9em; opacity: 0.85; max-width: 320px; line-height: 1.4;">
+                            Bấm "Mở Camera" để chụp selfie hoặc "Tải Ảnh Từ Máy" để lồng vào khung ngay lập tức!
+                        </div>
+                    </div>
+                    <div class="countdown-overlay" id="countdownOverlay">3</div>
+                    <div class="flash-overlay" id="flashOverlay"></div>
+                </div>
+
+                <!-- Thanh công cụ nổi khi chuyển sang chế độ Toàn Màn Hình -->
+                <div class="fullscreen-toolbar" id="fullscreenToolbar">
+                    <button type="button" class="fs-btn fs-snap" id="fsCaptureBtn" style="display: none;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="8"/></svg>
+                        Chụp Ảnh (3s)
+                    </button>
+                    <button type="button" class="fs-btn" id="fsPrevFrameBtn">Khung Trước</button>
+                    <span class="fs-frame-label" id="fsFrameLabel">Khung 1/5</span>
+                    <button type="button" class="fs-btn" id="fsNextFrameBtn">Khung Tiếp</button>
+                    <button type="button" class="fs-btn fs-close" id="fsCloseBtn">Thoát Toàn Màn Hình</button>
+                </div>
+            </div>
+
+            <!-- Điều khiển Chụp / Tải ảnh / Toàn màn hình -->
+            <div class="booth-controls">
+                <button type="button" class="btn-booth btn-upload" id="startCameraBtn">
+                    Mở Camera
+                </button>
+                <button type="button" class="btn-booth btn-capture" id="captureBtn" style="display: none;">
+                    Chụp Ảnh (3s)
+                </button>
+                <button type="button" class="btn-booth btn-upload" id="uploadPhotoBtn">
+                    Tải Ảnh Từ Máy
+                </button>
+                <button type="button" class="btn-booth btn-fullscreen" id="fullscreenBtn" title="Bật chế độ chụp toàn màn hình">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+                    Toàn Màn Hình
+                </button>
+                <input type="file" id="boothFileInput" accept="image/*" style="display: none;">
+            </div>
+
+            <!-- Canvas ẩn để xử lý đồ họa -->
+            <canvas id="boothCanvas" width="800" height="1000"></canvas>
+
+            <!-- Kết quả ảnh Chụp / Ghép -->
+            <div class="booth-result-area" id="boothResultArea">
+                <div style="font-family: var(--font-hand); font-size: 1.5em; color: var(--red); margin-bottom: 15px; font-weight: bold;">
+                    Ảnh Của Bạn Đã Sẵn Sàng!
+                </div>
+                <div>
+                    <img id="boothPreviewImg" alt="Xem trước ảnh chụp khung">
+                </div>
+                
+                <!-- HỘP CHÚC MỪNG VÀ ĐIỀU HƯỚNG TẶNG HOA NHANH -->
+                <div class="booth-celeb-box" id="boothCelebBox" style="display: none;">
+                    <div class="celeb-title">Khoảnh Khắc Kỷ Niệm Của Bạn Đã Sẵn Sàng!</div>
+                    <div class="celeb-badge">+1 Bông Hoa Tri Ân Đã Nhận!</div>
+                    <p class="celeb-desc">Bạn có muốn gửi tặng bông hoa tươi thắm này kèm bức ảnh vừa chụp đến Thầy Cô kính yêu ngay không?</p>
+                    <div class="celeb-btn-group">
+                        <button type="button" class="btn-celeb-action btn-celeb-gift" id="btnQuickGiftTeacher">
+                            Tặng Hoa Cho Thầy Cô Ngay
+                        </button>
+                        <button type="button" class="btn-celeb-action btn-celeb-post" id="btnQuickAddToMemory">
+                            Đưa Ảnh Vào Sổ Lưu Bút
+                        </button>
+                    </div>
+                </div>
+
+                <div class="result-btn-group">
+                    <button type="button" class="btn-booth btn-download" id="downloadPhotoBtn">
+                        Tải Ảnh Về Máy
+                    </button>
+                    <button type="button" class="btn-booth btn-post-web" id="sendToPostBtn">
+                        Đưa Vào Bài Đăng Web
+                    </button>
+                    <button type="button" class="btn-booth btn-facebook" id="shareFacebookBtn">
+                        Chia Sẻ Lên Facebook
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Form Tùy Bút & Đăng Bài -->
+        <section id="teacherSection" class="teacher-section app-zone">
+            <div class="section-title">Tri Ân Thầy Cô & Tặng Hoa Online</div>
+            
+            <div class="flower-garden-banner">
+                <div class="flower-garden-title">
+                    Vườn hoa tri ân: Đã có <span id="teacherFlowerTotal" class="flower-garden-count">0</span> bó hoa được gửi tặng các Thầy Cô!
+                </div>
+                <div class="user-flower-badge" id="userFlowerBadge">
+                    <span id="userFlowerStatusText">Túi hoa của bạn: <strong>0</strong> bông hoa</span>
+                    <a href="#photoboothSection" class="btn-earn-flower" id="earnFlowerLink">Chụp 1 bức để nhận hoa!</a>
+                </div>
+            </div>
+
+            
+            <!-- DANH SÁCH THẦY CÔ THÂN YÊU (CUTE TEACHER PROFILES) -->
+            <div class="teachers-section-card">
+                <div class="teachers-header">
+                    <div class="teachers-header-title">Thầy Cô Kính Yêu</div>
+                    <div class="teachers-header-subtitle">Chọn Thầy Cô thân thương để gửi gắm bó hoa tươi thắm cùng lời tri ân 20/11 ngọt ngào nhất!</div>
+                </div>
+                <div class="teachers-grid" id="teachersGrid">
+                    <!-- Sẽ được khởi tạo bằng JavaScript -->
+                </div>
+            </div>
+
+            <!-- Cảnh báo Thầy Cô đang được chọn gửi riêng -->
+            <div id="targetTeacherAlert" class="teacher-target-alert" style="display: none;">
+                <div>
+                    Đang gửi tặng tới: <span id="targetTeacherAlertName" class="target-teacher-name-highlight">Toàn thể Thầy Cô</span>
+                </div>
+                <button type="button" class="btn-greeting-action" id="btnResetTargetTeacher">Gửi chung cho toàn trường</button>
+            </div>
+
+            <form id="teacherForm" class="memory-form" style="border-color: var(--yellow);">
+                <div class="form-group">
+                    <label>Tên học trò:</label>
+                    <input type="text" id="teacherSenderName" required placeholder="Nhập tên của bạn...">
+                </div>
+                <div class="form-group">
+                    <label>Niên khóa:</label>
+                    <select id="teacherSenderBatch" required style="width: 100%; padding: 10px; border: 1px solid var(--pink-light); border-radius: 8px; font-family: var(--font-body); font-size: 1em; outline: none; background: white;">
+                        <option value="" disabled selected>Chọn niên khóa...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Hình thức gửi lời chúc:</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="teacherSendType" value="general" checked> Gửi chung (Toàn thể Thầy Cô)</label>
+                        <label><input type="radio" name="teacherSendType" value="private"> Gửi riêng (Thầy / Cô cụ thể)</label>
+                    </div>
+                </div>
+                <div class="form-group" id="privateTeacherGroup" style="display: none;">
+                    <label>Kính gửi Thầy / Cô:</label>
+                    <input type="text" id="targetTeacherName" placeholder="Ví dụ: Cô Mai Lan - GVCN 12A1, Thầy Hùng dạy Toán...">
+                </div>
+
+                <!-- Chọn bó hoa tri ân -->
+                <div class="form-group">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
+                        <label style="margin-bottom: 0;">Chọn bó hoa gửi tặng Thầy Cô:</label>
+                        <span style="font-size: 0.85em; color: var(--red); font-weight: 600;">(Điều kiện: Chụp 1 bức ảnh nhận 1 bông hoa)</span>
+                    </div>
+                    <div class="flower-picker" id="flowerPicker">
+                        <!-- Javascript sẽ tự động điền danh sách 10 mẫu hoa từ TEACHER_FLOWERS -->
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Lời chúc / Lời tri ân gửi Thầy Cô:</label>
+                    <textarea id="teacherWishContent" required placeholder="Gửi gắm những lời tri ân, lòng biết ơn sâu sắc đến Thầy Cô kính yêu..." rows="4"></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitTeacherWishBtn" style="background: linear-gradient(135deg, #f7b733, #fc4a1a);">
+                    Gửi Lời Chúc & Tặng Hoa Tri Ân (Tốn 1 bông hoa)
+                </button>
+            </form>
+        </section>
+
+        <section id="writeSection" class="write-section app-zone">
+            <div class="section-title">Viết Tùy Bút & Đăng Bài</div>
+            <form id="memoryForm" class="memory-form">
+                <div class="form-group">
+                    <label>Tên của bạn:</label>
+                    <input type="text" id="authorName" required placeholder="Nhập tên...">
+                </div>
+                <div class="form-group">
+                    <label>Niên khóa:</label>
+                    <select id="authorBatch" required style="width: 100%; padding: 10px; border: 1px solid var(--pink-light); border-radius: 8px; font-family: var(--font-body); font-size: 1em; outline: none; background: white;">
+                        <option value="" disabled selected>Chọn niên khóa...</option>
+                        <!-- Javascript sẽ tự động điền K1 - K34 -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Bạn là:</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="userRole" value="hoc-sinh" checked> Học sinh</label>
+                        <label><input type="radio" name="userRole" value="cuu-hoc-sinh"> Cựu học sinh</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Kỷ niệm của bạn:</label>
+                    <textarea id="memoryContent" required placeholder="Viết những dòng hồi ức của bạn vào đây..." rows="4"></textarea>
+                </div>
+
+                <!-- Đính kèm ảnh trong bài viết -->
+                <div class="form-group">
+                    <label>Đính kèm hình ảnh kỷ niệm (Tùy chọn):</label>
+                    <div class="image-attach-area">
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 8px;">
+                            <button type="button" class="tab-btn" id="triggerPostImageBtn" style="font-size: 0.9em;">
+                                Chọn ảnh từ thiết bị
+                            </button>
+                            <button type="button" class="tab-btn" id="attachFromBoothBtn" style="font-size: 0.9em; display: none;">
+                                Lấy ảnh vừa chụp / ghép khung
+                            </button>
+                        </div>
+                        <input type="file" id="postImageInput" accept="image/*" style="display: none;">
+                        <div id="postImagePreviewContainer" style="display: none;" class="image-preview-box">
+                            <img id="postImagePreviewImg" alt="Xem trước ảnh đính kèm">
+                            <button type="button" class="btn-remove-img" id="removePostImageBtn" title="Gỡ ảnh">×</button>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn">Lưu Lại Kỷ Niệm</button>
+            </form>
+        </section>
+
+        <!-- Hiển thị Tùy Bút & Kỷ Niệm -->
+        <section id="timelineSection" class="timeline-section app-zone">
+            <div class="section-title">Những Dòng Kỷ Niệm</div>
+            <!-- Chế độ lọc -->
+            <!-- Bộ lọc & Tìm kiếm -->
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 15px; margin-bottom: 25px;">
+                <div class="filter-tabs" style="margin-bottom: 0; flex-wrap: wrap;">
+                    <button class="tab-btn active" data-filter="all">Tất cả</button>
+                    <button class="tab-btn" data-filter="memory">Tùy bút</button>
+                    <button class="tab-btn" data-filter="teacher">Tri ân Thầy Cô</button>
+                    <button class="tab-btn" data-filter="has-image">Có ảnh</button>
+                    <button class="tab-btn" data-filter="hoc-sinh">Học sinh</button>
+                    <button class="tab-btn" data-filter="cuu-hoc-sinh">Cựu học sinh</button>
+                </div>
+                <input type="text" id="searchInput" placeholder="Tìm kiếm tên, mã ID, nội dung, hoặc thời gian (vd: 05/08/2026)..." style="width: 100%; max-width: 480px; padding: 10px 15px; border: 1px solid var(--pink-light); border-radius: 20px; font-family: var(--font-body); font-size: 1em; outline: none; transition: border-color 0.3s;">
+            </div>
+            <div class="timeline" id="memoryTimeline">
+                <!-- Tùy bút trống lúc đầu, sẽ được JavaScript thêm vào -->
+                <div id="emptyMessage" style="text-align: center; color: var(--ink-light); font-style: italic;">
+                    Chưa có kỷ niệm nào. Hãy là người đầu tiên viết tùy bút!
+                </div>
+            </div>
+        </section>
+
+        <section style="text-align: center; padding: 30px 0;">
+            <p style="font-family: var(--font-title); font-size: 2.5em; color: var(--red); opacity: 0.8;">"Thanh xuân
+                như một cơn mưa rào..."</p>
+            <p style="font-style: italic; color: var(--ink-light); margin-top: 10px;">Dù có quay trở lại, cũng không thể
+                nào quên được những ngày tháng ấy.</p>
+        </section>
+
+        <footer class="footer">
+            <button id="adminLoginBtn" style="background: none; border: none; color: var(--pink); font-size: 0.9em; cursor: pointer; text-decoration: underline; margin-top: 15px; font-family: var(--font-body);">Đăng Nhập Quản Trị Hệ Thống</button>
+        </footer>
+    </div>
+
+    <!-- Trình Phát Nhạc Bên Cạnh -->
+    <div class="music-widget">
+        <div class="music-header">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" id="diskIcon" class="spin-disk" style="display:inline-block; animation-play-state: paused; vertical-align: middle; margin-right: 6px;"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="12" cy="12" r="3" fill="currentColor"/><circle cx="12" cy="12" r="6" stroke="currentColor" stroke-width="0.8" stroke-dasharray="2 2" fill="none"/></svg>
+            Mixtape Thanh Xuân
+        </div>
+        <div class="music-controls">
+            <button class="music-btn" id="prevBtn" title="Bài trước">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+            </button>
+            <button class="music-btn" id="playPauseBtn" title="Phát/Tạm dừng">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            </button>
+            <button class="music-btn" id="nextBtn" title="Bài sau">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+            </button>
+        </div>
+        <ul class="playlist" id="playlist">
+            <!-- Danh sách bài hát -->
+        </ul>
+        <audio id="bgMusic"></audio>
+    </div>
+
+    <!-- MODAL ĐĂNG NHẬP FIREBASE BACKEND -->
+    <div id="authModal" class="auth-modal-overlay">
+        <div class="auth-modal-card">
+            <button class="auth-close-btn" id="closeAuthModalBtn" title="Đóng">&times;</button>
+            <div class="auth-modal-header">
+                <div class="auth-modal-title">Quản Trị Hệ Thống</div>
+                <div class="auth-modal-subtitle">Kết nối Firebase Backend để quản lý bài viết và kỷ niệm</div>
+            </div>
+
+            <!-- Trạng thái KHI ĐÃ ĐĂNG NHẬP -->
+            <div id="authLoggedInView" style="display: none;">
+                <div class="auth-status-box">
+                    <div style="font-weight: 700; color: #166534; margin-bottom: 4px;">Backend Firebase: Đang Kết Nối</div>
+                    <div id="authCurrentUserEmail" style="font-size: 0.95em; color: var(--ink); font-weight: 600;">admin@luubutmaitruong.com</div>
+                    <div style="font-size: 0.85em; color: var(--ink-light); margin-top: 6px; font-style: italic;">Chế độ Quản trị viên đang kích hoạt (Có quyền xóa bài viết vi phạm trên dòng thời gian).</div>
+                </div>
+                <div class="auth-actions">
+                    <button type="button" class="btn-auth-primary" style="background: var(--red);" id="authSignOutBtn">Đăng Xuất Khỏi Hệ Thống</button>
+                </div>
+            </div>
+
+            <!-- Trạng thái KHI CHƯA ĐĂNG NHẬP -->
+            <div id="authLoggedOutView">
+                <div class="auth-tabs">
+                    <button type="button" class="auth-tab-btn active" id="tabEmailAuthBtn">Tài Khoản Firebase</button>
+                    <button type="button" class="auth-tab-btn" id="tabPinAuthBtn">Mã PIN Nhanh</button>
+                </div>
+
+                <!-- Đăng nhập bằng Firebase Authentication Email/Password -->
+                <form id="firebaseEmailForm">
+                    <div class="auth-form-group">
+                        <label>Email Quản trị:</label>
+                        <input type="email" id="authEmailInput" placeholder="admin@luubutmaitruong.com" required>
+                    </div>
+                    <div class="auth-form-group">
+                        <label>Mật khẩu:</label>
+                        <input type="password" id="authPasswordInput" placeholder="Nhập mật khẩu..." required>
+                    </div>
+                    <div class="auth-actions">
+                        <button type="submit" class="btn-auth-primary" id="btnSignInFirebase">Đăng Nhập Firebase</button>
+                        <button type="button" class="btn-auth-secondary" id="btnCreateAdminFirebase">Đăng Ký Tài Khoản Mới</button>
+                    </div>
+                </form>
+
+                <!-- Đăng nhập bằng Mã PIN bảo mật dự phòng -->
+                <form id="pinAuthForm" style="display: none;">
+                    <div class="auth-form-group">
+                        <label>Mã PIN bảo mật Quản trị:</label>
+                        <input type="password" id="authPinInput" placeholder="Nhập mã PIN bí mật..." required>
+                    </div>
+                    <div class="auth-actions">
+                        <button type="submit" class="btn-auth-primary">Xác Nhận Đăng Nhập</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- BẢO VỆ TRANG WEB: CHẶN F12, XEM NGUỒN (CTRL+U), CHUỘT PHẢI ---
+        document.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            return false;
+        });
+
+        document.addEventListener('keydown', (e) => {
+            // Chặn F12
+            if (e.key === 'F12' || e.keyCode === 123) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+            // Chặn Ctrl+U / Cmd+U (Xem mã nguồn)
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'u' || e.key === 'U' || e.keyCode === 85)) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+            // Chặn Ctrl+Shift+I / J / C (DevTools console, inspect)
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && (
+                e.key === 'I' || e.key === 'i' || e.keyCode === 73 ||
+                e.key === 'J' || e.key === 'j' || e.keyCode === 74 ||
+                e.key === 'C' || e.key === 'c' || e.keyCode === 67
+            )) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+            // Chặn Ctrl+S (Lưu trang)
+            if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S' || e.keyCode === 83)) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        });
+
+        const canvas = document.getElementById('petalsCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const petals = [];
+        const petalCount = 20;
+
+        class Petal {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * -canvas.height;
+                this.size = Math.random() * 10 + 8;
+                this.speedY = Math.random() * 1.5 + 0.8;
+                this.speedX = Math.random() * 0.8 - 0.4;
+                this.rotation = Math.random() * 360;
+                this.rotationSpeed = Math.random() * 2 - 1;
+                this.opacity = Math.random() * 0.4 + 0.3;
+                this.color = Math.random() > 0.4 ? 'rgba(232, 160, 180, ' : 'rgba(247, 213, 229, ';
+            }
+            update() {
+                this.y += this.speedY;
+                this.x += this.speedX;
+                this.rotation += this.rotationSpeed;
+                if (this.y > canvas.height + 30) {
+                    this.y = -30;
+                    this.x = Math.random() * canvas.width;
+                }
+                if (this.x < -30) this.x = canvas.width + 30;
+                if (this.x > canvas.width + 30) this.x = -30;
+            }
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate((this.rotation * Math.PI) / 180);
+                ctx.beginPath();
+                ctx.ellipse(0, 0, this.size * 0.5, this.size, 0, 0, Math.PI * 2);
+                ctx.fillStyle = this.color + this.opacity + ')';
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        for (let i = 0; i < petalCount; i++) {
+            petals.push(new Petal());
+        }
+
+        function animatePetals() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            petals.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animatePetals);
+        }
+        animatePetals();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // Hiệu ứng xuất hiện nhẹ cho timeline
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = 1;
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.2 });
+
+        function observeNewItem(item) {
+            item.style.opacity = 0;
+            item.style.transform = 'translateY(20px)';
+            item.style.transition = 'all 0.6s ease';
+            observer.observe(item);
+            setTimeout(() => {
+                item.style.opacity = 1;
+                item.style.transform = 'translateY(0)';
+            }, 50);
+        }
+
+        // Xử lý form tùy bút & niên khóa
+        const memoryForm = document.getElementById('memoryForm');
+        const memoryTimeline = document.getElementById('memoryTimeline');
+        const emptyMessage = document.getElementById('emptyMessage');
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const batchSelect = document.getElementById('authorBatch');
+        const teacherBatchSelect = document.getElementById('teacherSenderBatch');
+
+        // Tạo danh sách niên khóa K1 -> K34 (K33 = 2010 => Năm sinh = 1977 + K)
+        function populateBatches(selectEl) {
+            if (!selectEl) return;
+            for (let i = 34; i >= 1; i--) {
+                const birthYear = 1977 + i;
+                const option = document.createElement('option');
+                option.value = 'K' + i;
+                option.textContent = `Khóa ${i} - K${i} (Sinh năm ${birthYear})`;
+                selectEl.appendChild(option);
+            }
+        }
+        populateBatches(batchSelect);
+        populateBatches(teacherBatchSelect);
+        const gateBatchSelect = document.getElementById('gateBatch');
+        populateBatches(gateBatchSelect);
+
+        let memories = [];
+
+        
+        // ================= HỆ THỐNG ĐĂNG NHẬP & PHIÊN NGƯỜI DÙNG (GATEKEEPER) =================
+        let currentUser = null;
+        const gatekeeperScreen = document.getElementById('gatekeeperScreen');
+        const gateForm = document.getElementById('gateForm');
+        const userGreetingBar = document.getElementById('userGreetingBar');
+        const greetingUserName = document.getElementById('greetingUserName');
+        const greetingUserBatch = document.getElementById('greetingUserBatch');
+        const greetingFlowerPill = document.getElementById('greetingFlowerPill');
+        const btnSwitchUser = document.getElementById('btnSwitchUser');
+        const gateAdminTrigger = document.getElementById('gateAdminTrigger');
+
+        function applyUserSession(u) {
+            if (!u) return;
+            if (greetingUserName) greetingUserName.textContent = u.name;
+            if (greetingUserBatch) greetingUserBatch.textContent = u.batch;
+            if (userGreetingBar) userGreetingBar.style.display = 'flex';
+
+            // Tự động điền thông tin vào Form Viết Tùy Bút
+            const authorNameInput = document.getElementById('authorName');
+            const authorBatchSelect = document.getElementById('authorBatch');
+            if (authorNameInput) authorNameInput.value = u.name;
+            if (authorBatchSelect) authorBatchSelect.value = u.batch;
+
+            // Tự động điền thông tin vào Form Tri Ân Thầy Cô
+            const teacherSenderName = document.getElementById('teacherSenderName');
+            const teacherSenderBatch = document.getElementById('teacherSenderBatch');
+            if (teacherSenderName) teacherSenderName.value = u.name;
+            if (teacherSenderBatch) teacherSenderBatch.value = u.batch;
+
+            // Chọn radio vai trò tương ứng
+            const roleRadio = document.querySelector(`input[name="userRole"][value="${u.role}"]`);
+            if (roleRadio) roleRadio.checked = true;
+        }
+
+        function checkUserSession() {
+            const saved = localStorage.getItem('thanhxuan_user');
+            if (saved) {
+                try {
+                    currentUser = JSON.parse(saved);
+                    applyUserSession(currentUser);
+                    if (gatekeeperScreen) gatekeeperScreen.style.display = 'none';
+                } catch(e) {
+                    if (gatekeeperScreen) gatekeeperScreen.style.display = 'flex';
+                }
+            } else {
+                if (gatekeeperScreen) gatekeeperScreen.style.display = 'flex';
+            }
+        }
+
+        if (gateForm) {
+            gateForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const name = document.getElementById('gateName').value.trim();
+                const batch = document.getElementById('gateBatch').value;
+                const role = document.querySelector('input[name="gateRole"]:checked').value;
+                const roleName = role === 'cuu-hoc-sinh' ? 'Cựu học sinh' : (role === 'thay-co' ? 'Thầy Cô' : 'Học sinh');
+
+                if (!name || !batch) {
+                    alert('Vui lòng nhập tên và chọn niên khóa của bạn nhé!');
+                    return;
+                }
+
+                currentUser = { name, batch, role, roleName };
+                localStorage.setItem('thanhxuan_user', JSON.stringify(currentUser));
+                applyUserSession(currentUser);
+
+                if (gatekeeperScreen) {
+                    gatekeeperScreen.style.display = 'none';
+                }
+            });
+        }
+
+        if (btnSwitchUser) {
+            btnSwitchUser.addEventListener('click', () => {
+                if (gatekeeperScreen) {
+                    if (currentUser) {
+                        const gateName = document.getElementById('gateName');
+                        const gateBatch = document.getElementById('gateBatch');
+                        if (gateName) gateName.value = currentUser.name || '';
+                        if (gateBatch) gateBatch.value = currentUser.batch || '';
+                        const rRadio = document.querySelector(`input[name="gateRole"][value="${currentUser.role}"]`);
+                        if (rRadio) rRadio.checked = true;
+                    }
+                    gatekeeperScreen.style.display = 'flex';
+                }
+            });
+        }
+
+        if (gateAdminTrigger) {
+            gateAdminTrigger.addEventListener('click', () => {
+                openAuthModal();
+            });
+        }
+
+        // ================= HỆ THỐNG ĐIỀU HƯỚNG TỪNG PHÂN KHU (TABS) =================
+        function switchZoneTab(zoneId) {
+            document.querySelectorAll('.app-zone').forEach(z => z.classList.remove('active'));
+            document.querySelectorAll('.zone-tab-btn').forEach(b => b.classList.remove('active'));
+
+            const targetZone = document.getElementById(zoneId);
+            const targetBtn = document.querySelector(`.zone-tab-btn[data-zone="${zoneId}"]`);
+
+            if (targetZone) {
+                targetZone.classList.add('active');
+            }
+            if (targetBtn) {
+                targetBtn.classList.add('active');
+            }
+
+            // Cuộn trang lên đầu vùng phân khu
+            window.scrollTo({ top: 120, behavior: 'smooth' });
+        }
+
+        document.querySelectorAll('.zone-tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                switchZoneTab(btn.dataset.zone);
+            });
+        });
+
+        // ================= DANH SÁCH THẦY CÔ CUTE (TEACHER PROFILES) =================
+        const CUTE_TEACHERS = [
+            {
+                id: 'minh',
+                name: 'Thầy Nguyễn Văn Minh',
+                subject: 'Giáo Dục Công Dân & Kỹ Năng Sống',
+                roleTag: 'Hiệu Trưởng Kính Mến',
+                quote: 'Luôn đứng ở cổng trường vẫy tay chào học sinh mỗi sáng với nụ cười ấm áp hiền từ.',
+                bg: '#fff7ed',
+                border: '#fdba74',
+                tagBg: '#ffedd5',
+                tagColor: '#c2410c',
+                avatarColor: '#f97316',
+                iconSvg: '<path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z"/>'
+            },
+            {
+                id: 'mai',
+                name: 'Cô Nguyễn Thị Mai',
+                subject: 'Giáo Viên Toán • Chủ Nhiệm 12A1',
+                roleTag: 'Cô Chủ Nhiệm Quốc Dân',
+                quote: 'Dạy toán cực kỳ dễ hiểu, hay chuẩn bị bánh kẹo và trà sữa đãi cả lớp mỗi khi đạt điểm cao.',
+                bg: '#fdf2f8',
+                border: '#f472b6',
+                tagBg: '#fce7f3',
+                tagColor: '#be185d',
+                avatarColor: '#ec4899',
+                iconSvg: '<path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>'
+            },
+            {
+                id: 'nam',
+                name: 'Thầy Trần Hoàng Nam',
+                subject: 'Giáo Viên Vật Lý',
+                roleTag: 'Cây Hài Của Trường',
+                quote: 'Mỗi công thức Lý đều trở thành một câu chuyện cười vui nhộn, tiết học luôn ngập tràn tiếng cười.',
+                bg: '#eff6ff',
+                border: '#60a5fa',
+                tagBg: '#dbeafe',
+                tagColor: '#1d4ed8',
+                avatarColor: '#3b82f6',
+                iconSvg: '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>'
+            },
+            {
+                id: 'trang',
+                name: 'Cô Lê Thu Trang',
+                subject: 'Giáo Viên Ngữ Văn',
+                roleTag: 'Người Truyền Cảm Hứng',
+                quote: 'Giọng đọc truyền cảm ấm áp, thắp sáng tình yêu văn học và bài học làm người cho bao thế hệ.',
+                bg: '#faf5ff',
+                border: '#c084fc',
+                tagBg: '#f3e8ff',
+                tagColor: '#7e22ce',
+                avatarColor: '#a855f7',
+                iconSvg: '<path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/>'
+            },
+            {
+                id: 'anh',
+                name: 'Thầy Đỗ Quốc Anh',
+                subject: 'Thể Dục • Bí Thư Đoàn',
+                roleTag: 'Thầy Đoàn Siêu Ngầu',
+                quote: 'Nhiệt huyết, phong độ, luôn chạy cùng học sinh trên sân cỏ và cổ vũ mọi phong trào sôi nổi.',
+                bg: '#f0fdf4',
+                border: '#4ade80',
+                tagBg: '#dcfce7',
+                tagColor: '#15803d',
+                avatarColor: '#22c55e',
+                iconSvg: '<path d="M12 2c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm9 7h-6v13h-2v-6h-2v6H9V9H3V7h18v2z"/>'
+            },
+            {
+                id: 'ngoc',
+                name: 'Cô Phạm Bảo Ngọc',
+                subject: 'Giáo Viên Tiếng Anh',
+                roleTag: 'Cô Giáo Gen Z',
+                quote: 'Trẻ trung, phát âm chuẩn Tây, luôn tạo minigame tương tác sôi nổi giúp học trò tự tin tỏa sáng.',
+                bg: '#fefce8',
+                border: '#facc15',
+                tagBg: '#fef9c3',
+                tagColor: '#a16207',
+                avatarColor: '#eab308',
+                iconSvg: '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>'
+            }
+        ];
+
+        function renderTeacherCards() {
+            const grid = document.getElementById('teachersGrid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            CUTE_TEACHERS.forEach(t => {
+                // Đếm số lượng hoa mà Thầy/Cô này đã nhận từ danh sách memories
+                const flowerCount = memories.filter(m => m.type === 'teacher' && m.teacherName && m.teacherName.toLowerCase().includes(t.name.toLowerCase())).length;
+
+                const card = document.createElement('div');
+                card.className = 'teacher-cute-card';
+                card.style.background = t.bg;
+                card.style.borderColor = t.border;
+                card.innerHTML = `
+                    <div>
+                        <div class="teacher-avatar-circle" style="background: ${t.avatarColor}20; color: ${t.avatarColor};">
+                            <svg width="36" height="36" viewBox="0 0 24 24" fill="currentColor">
+                                ${t.iconSvg}
+                            </svg>
+                        </div>
+                        <div class="teacher-card-name">${t.name}</div>
+                        <span class="teacher-subject-badge" style="background: ${t.tagBg}; color: ${t.tagColor};">${t.subject}</span>
+                        <div class="teacher-quote-box">"${t.quote}"</div>
+                    </div>
+                    <div>
+                        <div class="teacher-flower-stat">Đã nhận: <strong>${flowerCount}</strong> bó hoa tri ân</div>
+                        <button type="button" class="btn-gift-teacher-card" data-teacher="${t.name}">
+                            Gửi Bó Hoa Tri Ân
+                        </button>
+                    </div>
+                `;
+
+                const btnGift = card.querySelector('.btn-gift-teacher-card');
+                btnGift.addEventListener('click', () => {
+                    selectTeacherToGift(t.name);
+                });
+
+                grid.appendChild(card);
+            });
+        }
+
+        function selectTeacherToGift(teacherName) {
+            const privateRadio = document.querySelector('input[name="teacherSendType"][value="private"]');
+            if (privateRadio) {
+                privateRadio.checked = true;
+                privateRadio.dispatchEvent(new Event('change'));
+            }
+            if (targetTeacherNameInput) {
+                targetTeacherNameInput.value = teacherName;
+            }
+
+            const alertBox = document.getElementById('targetTeacherAlert');
+            const alertName = document.getElementById('targetTeacherAlertName');
+            if (alertBox && alertName) {
+                alertName.textContent = teacherName;
+                alertBox.style.display = 'flex';
+            }
+
+            // Cuộn xuống khu vực chọn hoa và lời chúc
+            const picker = document.getElementById('flowerPicker');
+            if (picker) {
+                picker.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        const btnResetTargetTeacher = document.getElementById('btnResetTargetTeacher');
+        if (btnResetTargetTeacher) {
+            btnResetTargetTeacher.addEventListener('click', () => {
+                const publicRadio = document.querySelector('input[name="teacherSendType"][value="public"]');
+                if (publicRadio) {
+                    publicRadio.checked = true;
+                    publicRadio.dispatchEvent(new Event('change'));
+                }
+                const alertBox = document.getElementById('targetTeacherAlert');
+                if (alertBox) alertBox.style.display = 'none';
+            });
+        }
+
+
+        // ================= CẤU HÌNH VÀ KẾT NỐI FIREBASE BACKEND =================
+        const firebaseConfig = {
+            apiKey: "AIzaSyBTzOvrkLBLLwCp92vCPwr19gaa3GPUUkk",
+            authDomain: "luubutmaitruong.firebaseapp.com",
+            databaseURL: "https://luubutmaitruong-default-rtdb.firebaseio.com",
+            projectId: "luubutmaitruong",
+            storageBucket: "luubutmaitruong.firebasestorage.app",
+            messagingSenderId: "478975164360",
+            appId: "1:478975164360:web:9ad178daf6a25d1845cafd",
+            measurementId: "G-M4T4PPFYV9"
+        };
+
+        let firebaseApp = null;
+        let firebaseAuth = null;
+        let firebaseDb = null;
+        let firebaseAnalytics = null;
+        let currentAuthUser = null;
+        let isLocalAdmin = false;
+
+        if (typeof firebase !== 'undefined') {
+            try {
+                firebaseApp = firebase.initializeApp(firebaseConfig);
+                firebaseAuth = firebase.auth();
+                firebaseDb = firebase.database();
+                try {
+                    firebaseAnalytics = firebase.analytics();
+                } catch (e) {
+                    console.log('Firebase Analytics note:', e.message);
+                }
+            } catch (err) {
+                console.warn('Firebase init note:', err);
+            }
+        }
+
+        // Lắng nghe dữ liệu thời gian thực từ Firebase Realtime Database
+        if (firebaseDb) {
+            const memoriesRef = firebaseDb.ref('memories');
+            memoriesRef.on('value', (snapshot) => {
+                const remoteList = [];
+                snapshot.forEach((child) => {
+                    const item = child.val();
+                    if (item) remoteList.push(item);
+                });
+                if (remoteList.length > 0) {
+                    memories = remoteList;
+                    memories.sort((a, b) => (b.id || 0) - (a.id || 0));
+                    const activeTab = document.querySelector('.tab-btn.active');
+                    renderMemories(activeTab ? activeTab.dataset.filter : 'all');
+                    updateFlowerCounter();
+                }
+            }, (error) => {
+                console.warn('Firebase RTDB note:', error);
+            });
+        }
+
+        let isAdmin = false;
+        let searchQuery = '';
+        let currentPostImage = null; // Ảnh đính kèm bài viết
+
+        // Lightbox xem ảnh phóng to
+        window.openLightbox = function(src) {
+            const lb = document.getElementById('imageLightbox');
+            const img = document.getElementById('lightboxImg');
+            if (lb && img) {
+                img.src = src;
+                lb.style.display = 'flex';
+            }
+        };
+        window.closeLightbox = function() {
+            const lb = document.getElementById('imageLightbox');
+            if (lb) lb.style.display = 'none';
+        };
+
+        const adminLoginBtn = document.getElementById('adminLoginBtn');
+        const openAuthModalBtn = document.getElementById('openAuthModalBtn');
+        const closeAuthModalBtn = document.getElementById('closeAuthModalBtn');
+        const authModal = document.getElementById('authModal');
+        const authLoggedInView = document.getElementById('authLoggedInView');
+        const authLoggedOutView = document.getElementById('authLoggedOutView');
+        const authCurrentUserEmail = document.getElementById('authCurrentUserEmail');
+        const tabEmailAuthBtn = document.getElementById('tabEmailAuthBtn');
+        const tabPinAuthBtn = document.getElementById('tabPinAuthBtn');
+        const firebaseEmailForm = document.getElementById('firebaseEmailForm');
+        const pinAuthForm = document.getElementById('pinAuthForm');
+        const btnCreateAdminFirebase = document.getElementById('btnCreateAdminFirebase');
+        const authSignOutBtn = document.getElementById('authSignOutBtn');
+
+        // Hàm bảo mật: Băm SHA-256 kiểm tra mật khẩu PIN nội bộ
+        async function hashPassword(str) {
+            const buffer = new TextEncoder().encode(str);
+            const digest = await crypto.subtle.digest('SHA-256', buffer);
+            return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        function openAuthModal() {
+            if (authModal) authModal.style.display = 'flex';
+        }
+        function closeAuthModal() {
+            if (authModal) authModal.style.display = 'none';
+        }
+
+        if (openAuthModalBtn) openAuthModalBtn.addEventListener('click', openAuthModal);
+        if (closeAuthModalBtn) closeAuthModalBtn.addEventListener('click', closeAuthModal);
+        if (adminLoginBtn) adminLoginBtn.addEventListener('click', openAuthModal);
+        if (authModal) {
+            authModal.addEventListener('click', (e) => {
+                if (e.target === authModal) closeAuthModal();
+            });
+        }
+
+        // Cập nhật giao diện trạng thái Đăng nhập / Quản trị
+        function updateAuthUI(isLoggedIn, emailOrName) {
+            if (isLoggedIn) {
+                if (openAuthModalBtn) {
+                    openAuthModalBtn.textContent = 'Quản Trị (Bật)';
+                    openAuthModalBtn.classList.add('logged-in');
+                }
+                if (adminLoginBtn) {
+                    adminLoginBtn.textContent = 'Quản Trị: ' + (emailOrName || 'Đang Bật') + ' (Bấm để quản lý)';
+                }
+                if (authLoggedInView) authLoggedInView.style.display = 'block';
+                if (authLoggedOutView) authLoggedOutView.style.display = 'none';
+                if (authCurrentUserEmail) authCurrentUserEmail.textContent = emailOrName || 'Quản trị viên';
+            } else {
+                if (openAuthModalBtn) {
+                    openAuthModalBtn.textContent = 'Đăng Nhập Quản Trị';
+                    openAuthModalBtn.classList.remove('logged-in');
+                }
+                if (adminLoginBtn) {
+                    adminLoginBtn.textContent = 'Đăng Nhập Quản Trị Hệ Thống';
+                }
+                if (authLoggedInView) authLoggedInView.style.display = 'none';
+                if (authLoggedOutView) authLoggedOutView.style.display = 'block';
+            }
+        }
+
+        // Lắng nghe trạng thái Firebase Authentication
+        if (firebaseAuth) {
+            firebaseAuth.onAuthStateChanged((user) => {
+                if (user) {
+                    isAdmin = true;
+                    currentAuthUser = user;
+                    updateAuthUI(true, user.email || 'Quản trị viên');
+                } else {
+                    if (!isLocalAdmin) {
+                        isAdmin = false;
+                        currentAuthUser = null;
+                        updateAuthUI(false);
+                    }
+                }
+                const activeTab = document.querySelector('.tab-btn.active');
+                renderMemories(activeTab ? activeTab.dataset.filter : 'all');
+            });
+        }
+
+        // Chuyển tab trong modal đăng nhập
+        if (tabEmailAuthBtn && tabPinAuthBtn) {
+            tabEmailAuthBtn.addEventListener('click', () => {
+                tabEmailAuthBtn.classList.add('active');
+                tabPinAuthBtn.classList.remove('active');
+                firebaseEmailForm.style.display = 'block';
+                pinAuthForm.style.display = 'none';
+            });
+            tabPinAuthBtn.addEventListener('click', () => {
+                tabPinAuthBtn.classList.add('active');
+                tabEmailAuthBtn.classList.remove('active');
+                firebaseEmailForm.style.display = 'none';
+                pinAuthForm.style.display = 'block';
+            });
+        }
+
+        // Đăng nhập Firebase Auth (Email & Password)
+        if (firebaseEmailForm) {
+            firebaseEmailForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const email = document.getElementById('authEmailInput').value.trim();
+                const pass = document.getElementById('authPasswordInput').value;
+                if (!email || !pass) return;
+
+                if (!firebaseAuth) {
+                    alert('Firebase SDK chưa sẵn sàng. Bạn có thể chuyển sang tab "Mã PIN Nhanh" để đăng nhập.');
+                    return;
+                }
+
+                firebaseAuth.signInWithEmailAndPassword(email, pass)
+                    .then((cred) => {
+                        alert('Đăng nhập Firebase thành công! Quyền quản trị đã được kích hoạt.');
+                        closeAuthModal();
+                    })
+                    .catch((err) => {
+                        alert('Đăng nhập thất bại: ' + (err.message || 'Sai tài khoản hoặc mật khẩu.'));
+                    });
+            });
+        }
+
+        // Tạo tài khoản Quản trị Firebase
+        if (btnCreateAdminFirebase) {
+            btnCreateAdminFirebase.addEventListener('click', () => {
+                const email = document.getElementById('authEmailInput').value.trim();
+                const pass = document.getElementById('authPasswordInput').value;
+                if (!email || !pass) {
+                    alert('Vui lòng nhập Email và Mật khẩu (tối thiểu 6 ký tự) để đăng ký tài khoản Quản trị viên.');
+                    return;
+                }
+                if (pass.length < 6) {
+                    alert('Mật khẩu Firebase cần có ít nhất 6 ký tự.');
+                    return;
+                }
+                if (!firebaseAuth) {
+                    alert('Firebase SDK chưa sẵn sàng.');
+                    return;
+                }
+
+                firebaseAuth.createUserWithEmailAndPassword(email, pass)
+                    .then((cred) => {
+                        alert('Đăng ký tài khoản Quản trị Firebase thành công!');
+                        closeAuthModal();
+                    })
+                    .catch((err) => {
+                        alert('Không thể tạo tài khoản: ' + err.message);
+                    });
+            });
+        }
+
+        // Đăng nhập bằng Mã PIN bảo mật dự phòng
+        if (pinAuthForm) {
+            pinAuthForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const pin = document.getElementById('authPinInput').value;
+                const hashed = await hashPassword(pin);
+                if (hashed === '82b13d78d9ae75cc36694f67e7ec91c71e4d3b20294f6bb3861a7884ab0ac400') {
+                    isLocalAdmin = true;
+                    isAdmin = true;
+                    updateAuthUI(true, 'Quản Trị Viên (Mã PIN)');
+                    closeAuthModal();
+                    const activeTab = document.querySelector('.tab-btn.active');
+                    renderMemories(activeTab ? activeTab.dataset.filter : 'all');
+                    alert('Đăng nhập thành công! Chế độ Quản trị đã được bật.');
+                } else {
+                    alert('Sai mã PIN quản trị!');
+                }
+            });
+        }
+
+        // Đăng xuất
+        if (authSignOutBtn) {
+            authSignOutBtn.addEventListener('click', () => {
+                if (firebaseAuth && firebaseAuth.currentUser) {
+                    firebaseAuth.signOut().then(() => {
+                        isLocalAdmin = false;
+                        isAdmin = false;
+                        updateAuthUI(false);
+                        closeAuthModal();
+                        alert('Đã đăng xuất khỏi hệ thống!');
+                    }).catch(err => alert('Lỗi đăng xuất: ' + err.message));
+                } else {
+                    isLocalAdmin = false;
+                    isAdmin = false;
+                    updateAuthUI(false);
+                    closeAuthModal();
+                    const activeTab = document.querySelector('.tab-btn.active');
+                    renderMemories(activeTab ? activeTab.dataset.filter : 'all');
+                    alert('Đã thoát chế độ Quản trị viên!');
+                }
+            });
+        }
+
+        // Phím tắt '1' mở modal quản trị nhanh
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+            if (e.key === '1') {
+                openAuthModal();
+            }
+        });
+
+        window.deleteMemory = function(uniqueCode) {
+            if(confirm('Bạn có chắc chắn muốn xóa bài viết này không? Hành động này không thể hoàn tác.')) {
+                if (typeof firebase !== 'undefined') {
+                    firebase.database().ref('memories/' + uniqueCode).remove()
+                        .then(() => alert('Đã xóa thành công!'))
+                        .catch(err => alert('Lỗi xóa: ' + err));
+                } else {
+                    memories = memories.filter(m => m.uniqueCode !== uniqueCode);
+                    const activeTab = document.querySelector('.tab-btn.active');
+                    renderMemories(activeTab ? activeTab.dataset.filter : 'all');
+                    updateFlowerCounter();
+                }
+            }
+        };
+
+        // Lắng nghe tìm kiếm
+        const searchInput = document.getElementById('searchInput');
+        searchInput.addEventListener('input', (e) => {
+            searchQuery = e.target.value.toLowerCase();
+            const activeTab = document.querySelector('.tab-btn.active');
+            renderMemories(activeTab ? activeTab.dataset.filter : 'all');
+        });
+
+        // CẤU HÌNH TELEGRAM BOT (Được mã hóa an toàn tránh bot crawler tự động cào token)
+        const TELEGRAM_BOT_TOKEN = atob('ODU0NTMyMDY0NDpBQUdIcl9RUGF4d2JfYzdNRXJQU3J1WnlLeE9OWm1RaWRhUQ==');
+        const TELEGRAM_CHAT_ID = atob('ODczOTQzNzMxNw=='); 
+
+        function escapeTelegramHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        function sendToTelegram(memory) {
+            if (!TELEGRAM_CHAT_ID || TELEGRAM_CHAT_ID === 'YOUR_TELEGRAM_CHAT_ID_HERE') {
+                return;
+            }
+            let title = '<b>CÓ TÙY BÚT MỚI!</b>';
+            let extra = '';
+            if (memory.type === 'teacher') {
+                title = '<b>LỜI CHÚC TRI ÂN THẦY CÔ MỚI!</b>';
+                extra = `<b>Người nhận:</b> ${escapeTelegramHtml(memory.teacherName)}\n` +
+                        `<b>Tặng hoa:</b> ${escapeTelegramHtml(memory.flower)}\n`;
+            }
+            if (memory.image) {
+                extra += `<b>Hình ảnh:</b> [Có đính kèm ảnh kỷ niệm]\n`;
+            }
+
+            const message = `${title}\n\n` +
+                            `<b>Người gửi:</b> ${escapeTelegramHtml(memory.name)}\n` +
+                            `<b>Niên khóa:</b> ${escapeTelegramHtml(memory.batch)}\n` +
+                            `<b>Vai trò:</b> ${escapeTelegramHtml(memory.roleName || 'Học sinh')}\n` +
+                            extra +
+                            `<b>Mã cá nhân:</b> ${escapeTelegramHtml(memory.uniqueCode)}\n` +
+                            `<b>Thời gian:</b> ${escapeTelegramHtml(memory.date)}\n\n` +
+                            `<b>Nội dung:</b>\n${escapeTelegramHtml(memory.content)}`;
+
+            fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: TELEGRAM_CHAT_ID,
+                    text: message,
+                    parse_mode: 'HTML'
+                })
+            }).catch(error => console.error("Lỗi gửi Telegram:", error));
+        }
+
+        function generateUniqueCode(batch) {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let code = '';
+            for(let i=0; i<4; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
+            return (batch || 'K') + '-' + code;
+        }
+
+        // ----------------- XỬ LÝ ĐÍNH KÈM ẢNH BÀI VIẾT -----------------
+        const triggerPostImageBtn = document.getElementById('triggerPostImageBtn');
+        const postImageInput = document.getElementById('postImageInput');
+        const postImagePreviewContainer = document.getElementById('postImagePreviewContainer');
+        const postImagePreviewImg = document.getElementById('postImagePreviewImg');
+        const removePostImageBtn = document.getElementById('removePostImageBtn');
+        const attachFromBoothBtn = document.getElementById('attachFromBoothBtn');
+
+        triggerPostImageBtn.addEventListener('click', () => postImageInput.click());
+
+        function compressImage(fileOrImg, callback) {
+            const img = new Image();
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+                    const maxDim = 800;
+                    if (width > maxDim || height > maxDim) {
+                        if (width > height) {
+                            height = Math.round((height * maxDim) / width);
+                            width = maxDim;
+                        } else {
+                            width = Math.round((width * maxDim) / height);
+                            height = maxDim;
+                        }
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.75);
+                    callback(compressedDataUrl);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(fileOrImg);
+        }
+
+        postImageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                compressImage(file, (dataUrl) => {
+                    currentPostImage = dataUrl;
+                    postImagePreviewImg.src = dataUrl;
+                    postImagePreviewContainer.style.display = 'inline-block';
+                });
+            }
+        });
+
+        removePostImageBtn.addEventListener('click', () => {
+            currentPostImage = null;
+            postImageInput.value = '';
+            postImagePreviewContainer.style.display = 'none';
+        });
+
+        attachFromBoothBtn.addEventListener('click', () => {
+            if (lastBoothPhoto) {
+                currentPostImage = lastBoothPhoto;
+                postImagePreviewImg.src = lastBoothPhoto;
+                postImagePreviewContainer.style.display = 'inline-block';
+                document.getElementById('writeSection').scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+
+        // SUBMIT FORM TÙY BÚT & ĐĂNG BÀI
+        memoryForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const authorName = document.getElementById('authorName').value;
+            const authorBatch = document.getElementById('authorBatch').value;
+            const memoryContent = document.getElementById('memoryContent').value;
+            const userRole = document.querySelector('input[name="userRole"]:checked').value;
+            
+            const roleName = userRole === 'hoc-sinh' ? 'Học sinh' : 'Cựu học sinh';
+            const uniqueCode = generateUniqueCode(authorBatch);
+            
+            const now = new Date();
+            const dateString = now.toLocaleDateString('vi-VN') + ' ' + now.toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
+
+            const memory = {
+                id: Date.now(),
+                type: 'memory',
+                name: authorName,
+                batch: authorBatch,
+                uniqueCode: uniqueCode,
+                role: userRole,
+                roleName: roleName,
+                content: memoryContent,
+                image: currentPostImage || null,
+                date: dateString
+            };
+
+            // Nếu đã kết nối Firebase
+            if (typeof firebase !== 'undefined') {
+                firebase.database().ref('memories/' + uniqueCode).set(memory);
+            } else {
+                // Lưu nội bộ tạm thời khi chưa có cấu hình
+                memories.unshift(memory);
+                renderMemories('all');
+            }
+
+            // Gửi báo cáo Telegram
+            sendToTelegram(memory);
+
+            alert(`Đã đăng bài kỷ niệm thành công!\n\nMã kỷ niệm của bạn là: ${uniqueCode}\n(Hãy lưu lại mã này để tìm lại bài viết nhé!)`);
+            
+            // Xóa form
+            document.getElementById('authorName').value = '';
+            document.getElementById('memoryContent').value = '';
+            if (document.getElementById('authorBatch')) document.getElementById('authorBatch').value = '';
+            currentPostImage = null;
+            postImagePreviewContainer.style.display = 'none';
+            postImageInput.value = '';
+            
+            // Chuyển tab về Tất cả
+            tabBtns.forEach(b => b.classList.remove('active'));
+            document.querySelector('.tab-btn[data-filter="all"]').classList.add('active');
+        });
+
+                // ----------------- TRI ÂN THẦY CÔ & TẶNG HOA ONLINE -----------------
+        const teacherForm = document.getElementById('teacherForm');
+        const privateTeacherGroup = document.getElementById('privateTeacherGroup');
+        const targetTeacherNameInput = document.getElementById('targetTeacherName');
+        const teacherFlowerTotalEl = document.getElementById('teacherFlowerTotal');
+        const flowerPicker = document.getElementById('flowerPicker');
+
+        // Khởi tạo số dư hoa của người dùng từ LocalStorage
+        let userFlowerBalance = parseInt(localStorage.getItem('userFlowerBalance') || '0', 10);
+        let selectedFlowerObj = null;
+
+        // Dự phòng nếu flowers_data.js chưa load
+        if (typeof TEACHER_FLOWERS === 'undefined' || !window.TEACHER_FLOWERS || !window.TEACHER_FLOWERS.length) {
+            window.TEACHER_FLOWERS = [
+                { id: "flower_1", name: "Bó Hướng Dương Rực Rỡ", tag: "Tri ân Thầy Cô", src: "flowers/flower_1.webp" },
+                { id: "flower_2", name: "Bó Hoa Hồng Phấn", tag: "20/11 Cảm ơn Thầy Cô", src: "flowers/flower_2.webp" },
+                { id: "flower_3", name: "Bó Hoa Ly Trắng", tag: "Tri ân Thầy Cô", src: "flowers/flower_3.webp" },
+                { id: "flower_4", name: "Bó Cẩm Tú Cầu Tím", tag: "20/11 Cảm ơn Thầy Cô", src: "flowers/flower_4.webp" },
+                { id: "flower_5", name: "Bó Cẩm Chướng Hồng", tag: "20/11 Tri ân Thầy Cô", src: "flowers/flower_5.webp" },
+                { id: "flower_6", name: "Bó Tulip Vàng", tag: "Cảm ơn Thầy Cô", src: "flowers/flower_6.webp" },
+                { id: "flower_7", name: "Bó Cúc Họa Mi", tag: "Tri ân Thầy Cô", src: "flowers/flower_7.webp" },
+                { id: "flower_8", name: "Cành Hướng Dương Đơn", tag: "20/11 Yêu Thương", src: "flowers/flower_8.webp" },
+                { id: "flower_9", name: "Cành Hồng Nhung Đỏ", tag: "Cảm ơn Thầy Cô", src: "flowers/flower_9.webp" },
+                { id: "flower_10", name: "Cành Cẩm Chướng Đơn", tag: "Tri ân Thầy Cô", src: "flowers/flower_10.webp" }
+            ];
+        }
+
+        // Cập nhật huy hiệu túi hoa của người dùng
+        function updateUserFlowerBadge() {
+            const badge = document.getElementById('userFlowerBadge');
+            const text = document.getElementById('userFlowerStatusText');
+            const earnLink = document.getElementById('earnFlowerLink');
+            const balance = parseInt(localStorage.getItem('userFlowerBalance') || '0', 10);
+
+            // Cập nhật huy hiệu trên thanh chào mừng
+            const greetingPill = document.getElementById('greetingFlowerPill');
+            if (greetingPill) {
+                greetingPill.textContent = balance + ' bông hoa';
+            }
+
+            // Cập nhật huy hiệu trên thanh điều hướng tab
+            const tabIndicator = document.getElementById('tabFlowerIndicator');
+            if (tabIndicator) {
+                tabIndicator.textContent = balance + ' hoa';
+            }
+
+            if (!badge || !text) return;
+
+            if (balance > 0) {
+                badge.className = 'user-flower-badge has-flowers';
+                text.innerHTML = `Túi hoa của bạn: <strong>${balance}</strong> bông hoa sẵn sàng gửi tặng!`;
+                if (earnLink) {
+                    earnLink.textContent = 'Chụp thêm ảnh để nhận thêm hoa';
+                    earnLink.onclick = (e) => { e.preventDefault(); switchZoneTab('photoboothSection'); };
+                }
+            } else {
+                badge.className = 'user-flower-badge empty-flowers';
+                text.innerHTML = `Túi hoa của bạn: <strong>0</strong> bông hoa (Chưa thể gửi tặng)`;
+                if (earnLink) {
+                    earnLink.textContent = 'Chụp 1 bức để nhận hoa!';
+                    earnLink.onclick = (e) => { e.preventDefault(); switchZoneTab('photoboothSection'); };
+                }
+            }
+        }
+
+        // Tích lũy hoa khi người dùng chụp ảnh tại photobooth
+        function earnFlower() {
+            let balance = parseInt(localStorage.getItem('userFlowerBalance') || '0', 10);
+            balance += 1;
+            localStorage.setItem('userFlowerBalance', balance);
+            updateUserFlowerBadge();
+
+            setTimeout(() => {
+                alert(`Chúc mừng! Bạn vừa chụp/tạo 1 bức ảnh thanh xuân và nhận được +1 bông hoa tri ân!\nHiện trong túi của bạn có: ${balance} bông hoa.\nHãy cuộn xuống mục "Tri Ân Thầy Cô" để gửi tặng Thầy Cô nhé!`);
+            }, 300);
+        }
+
+        // Khởi tạo danh sách 10 mẫu hoa tri ân
+        function setupFlowerPicker() {
+            if (!flowerPicker || !window.TEACHER_FLOWERS) return;
+            flowerPicker.innerHTML = '';
+
+            TEACHER_FLOWERS.forEach((flower, idx) => {
+                const card = document.createElement('div');
+                card.className = 'flower-card' + (idx === 0 ? ' selected' : '');
+                card.innerHTML = `
+                    <img src="${flower.src}" class="flower-card-img" alt="${flower.name}">
+                    <div class="flower-card-name">${flower.name}</div>
+                    <span class="flower-card-tag">${flower.tag}</span>
+                `;
+                card.addEventListener('click', () => {
+                    document.querySelectorAll('.flower-card').forEach(c => c.classList.remove('selected'));
+                    card.classList.add('selected');
+                    selectedFlowerObj = flower;
+                });
+                flowerPicker.appendChild(card);
+            });
+            selectedFlowerObj = TEACHER_FLOWERS[0];
+        }
+
+        document.querySelectorAll('input[name="teacherSendType"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                if (e.target.value === 'private') {
+                    privateTeacherGroup.style.display = 'block';
+                    targetTeacherNameInput.required = true;
+                } else {
+                    privateTeacherGroup.style.display = 'none';
+                    targetTeacherNameInput.required = false;
+                }
+            });
+        });
+
+        function updateFlowerCounter() {
+            if (!teacherFlowerTotalEl) return;
+            const count = memories.filter(m => m.type === 'teacher' || m.flower).length;
+            teacherFlowerTotalEl.textContent = count;
+        }
+
+        // Xử lý gửi tặng hoa và lời chúc
+        teacherForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            let balance = parseInt(localStorage.getItem('userFlowerBalance') || '0', 10);
+            if (balance <= 0) {
+                alert('Bạn chưa có bông hoa nào trong túi!\n\nĐiều kiện: Bạn cần chụp 1 bức ảnh tại mục "Chụp Hình" phía trên để nhận 1 bông hoa tri ân tặng Thầy Cô nhé!');
+                document.getElementById('photoboothSection').scrollIntoView({ behavior: 'smooth' });
+                return;
+            }
+
+            const senderName = document.getElementById('teacherSenderName').value.trim();
+            const senderBatch = document.getElementById('teacherSenderBatch').value;
+            const sendType = document.querySelector('input[name="teacherSendType"]:checked').value;
+            const targetTeacher = sendType === 'private' ? (targetTeacherNameInput.value.trim() || 'Thầy/Cô') : 'Toàn thể Thầy Cô';
+            const wishContent = document.getElementById('teacherWishContent').value.trim();
+            const uniqueCode = generateUniqueCode(senderBatch);
+
+            // Khấu trừ 1 bông hoa
+            balance -= 1;
+            localStorage.setItem('userFlowerBalance', balance);
+            updateUserFlowerBadge();
+
+            const flowerData = selectedFlowerObj || (window.TEACHER_FLOWERS ? window.TEACHER_FLOWERS[0] : { name: 'Bó Hoa Tri Ân', src: '' });
+
+            const now = new Date();
+            const dateString = now.toLocaleDateString('vi-VN') + ' ' + now.toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
+
+            const tribute = {
+                id: Date.now(),
+                type: 'teacher',
+                name: senderName,
+                batch: senderBatch,
+                uniqueCode: uniqueCode,
+                role: 'hoc-sinh',
+                roleName: 'Học sinh',
+                teacherType: sendType,
+                teacherName: targetTeacher,
+                flower: flowerData.name,
+                flowerImg: flowerData.src,
+                content: wishContent,
+                date: dateString
+            };
+
+            if (typeof firebase !== 'undefined') {
+                firebase.database().ref('memories/' + uniqueCode).set(tribute);
+            } else {
+                memories.unshift(tribute);
+                renderMemories('all');
+                updateFlowerCounter();
+            }
+
+            sendToTelegram(tribute);
+
+            alert(`Đã gửi tặng [${flowerData.name}] tới ${targetTeacher} thành công!\nSố hoa còn lại trong túi của bạn: ${balance} bông.\nCảm ơn bạn đã luôn nhớ về công ơn Thầy Cô.`);
+
+            // Xóa form
+            document.getElementById('teacherSenderName').value = '';
+            document.getElementById('teacherSenderBatch').value = '';
+            document.getElementById('teacherWishContent').value = '';
+            targetTeacherNameInput.value = '';
+            document.querySelector('input[name="teacherSendType"][value="general"]').checked = true;
+            privateTeacherGroup.style.display = 'none';
+
+            // Cuộn xuống xem lời chúc
+            document.getElementById('timelineSection').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // Khởi tạo hệ thống hoa
+        
+        // Khởi tạo người dùng & giao diện
+        checkUserSession();
+        renderTeacherCards();
+        updateFlowerCounter();
+
+        setupFlowerPicker();
+        updateUserFlowerBadge();
+
+
+
+        // Dự phòng nếu frames_data.js chưa load
+        if (typeof BOOTH_FRAMES === 'undefined' || !window.BOOTH_FRAMES || !window.BOOTH_FRAMES.length) {
+            window.BOOTH_FRAMES = [
+                { id: "frame_1", name: "20/11 - Mèo Hồng & Nơ Xinh", width: 333, height: 360, aspectRatio: "333/360", src: "frames/frame_1.webp" },
+                { id: "frame_2", name: "20/11 - Bảng Đen & Hướng Dương", width: 341, height: 360, aspectRatio: "341/360", src: "frames/frame_2.webp" },
+                { id: "frame_3", name: "20/11 - Trời Xanh & Mây Trắng", width: 331, height: 360, aspectRatio: "331/360", src: "frames/frame_3.webp" },
+                { id: "frame_4", name: "20/11 - Máy Ảnh & Phim Tím", width: 491, height: 308, aspectRatio: "491/308", src: "frames/frame_4.webp" },
+                { id: "frame_5", name: "20/11 - Trái Tim & Nơ Đỏ", width: 514, height: 308, aspectRatio: "514/308", src: "frames/frame_5.webp" }
+            ];
+        }
+
+        
+        // ================= KHU VỰC CHỤP HÌNH PHOTOBOOTH =================
+        let currentFrameIndex = 0;
+        let loadedUserImg = null;
+        let lastBoothPhoto = null;
+        let boothStream = null;
+
+        const cameraBox = document.getElementById('cameraBox');
+        const cameraStage = document.getElementById('cameraStage');
+        const cameraVideo = document.getElementById('cameraVideo');
+        const cameraFrameOverlay = document.getElementById('cameraFrameOverlay');
+        const cameraPlaceholder = document.getElementById('cameraPlaceholder');
+        const userPhotoPreview = document.getElementById('userPhotoPreview');
+        const countdownOverlay = document.getElementById('countdownOverlay');
+        const flashOverlay = document.getElementById('flashOverlay');
+        const fullscreenToolbar = document.getElementById('fullscreenToolbar');
+        const fsFrameLabel = document.getElementById('fsFrameLabel');
+
+        const frameSelector = document.getElementById('frameSelector');
+        const boothCaptionInput = document.getElementById('boothCaptionInput');
+        const startCameraBtn = document.getElementById('startCameraBtn');
+        const captureBtn = document.getElementById('captureBtn');
+        const fsCaptureBtn = document.getElementById('fsCaptureBtn');
+        const uploadPhotoBtn = document.getElementById('uploadPhotoBtn');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const fsCloseBtn = document.getElementById('fsCloseBtn');
+        const fsPrevFrameBtn = document.getElementById('fsPrevFrameBtn');
+        const fsNextFrameBtn = document.getElementById('fsNextFrameBtn');
+        const boothFileInput = document.getElementById('boothFileInput');
+
+        const boothCanvas = document.getElementById('boothCanvas');
+        const boothCtx = boothCanvas.getContext('2d');
+        const boothResultArea = document.getElementById('boothResultArea');
+        const boothPreviewImg = document.getElementById('boothPreviewImg');
+        const downloadPhotoBtn = document.getElementById('downloadPhotoBtn');
+        const sendToPostBtn = document.getElementById('sendToPostBtn');
+        const shareFacebookBtn = document.getElementById('shareFacebookBtn');
+
+        // Khởi tạo bộ chọn khung ảnh
+        function setupFrameSelector() {
+            if (!frameSelector || !window.BOOTH_FRAMES) return;
+            frameSelector.innerHTML = '';
+            BOOTH_FRAMES.forEach((frame, idx) => {
+                const card = document.createElement('div');
+                card.className = 'frame-card' + (idx === currentFrameIndex ? ' active' : '');
+                card.innerHTML = `
+                    <img class="frame-card-thumb" src="${frame.src}" alt="${frame.name}">
+                    <span class="frame-card-name">${frame.name}</span>
+                `;
+                card.addEventListener('click', () => {
+                    document.querySelectorAll('.frame-card').forEach(c => c.classList.remove('active'));
+                    card.classList.add('active');
+                    currentFrameIndex = idx;
+                    applyFrameSelection();
+                });
+                frameSelector.appendChild(card);
+            });
+            applyFrameSelection();
+        }
+
+        // Cập nhật khung ảnh hiển thị và chỉnh tỉ lệ khung ngắm
+        function applyFrameSelection() {
+            if (!window.BOOTH_FRAMES) return;
+            const frame = BOOTH_FRAMES[currentFrameIndex];
+            if (!frame) return;
+
+            cameraFrameOverlay.src = frame.src;
+            cameraFrameOverlay.style.display = 'block';
+            cameraBox.style.aspectRatio = frame.aspectRatio;
+            if (cameraStage) cameraStage.style.aspectRatio = frame.aspectRatio;
+
+            if (fsFrameLabel) {
+                fsFrameLabel.textContent = `Khung ${currentFrameIndex + 1}/${BOOTH_FRAMES.length}`;
+            }
+
+            if (loadedUserImg) {
+                renderPhotobooth();
+            }
+        }
+
+        // Chế độ Toàn Màn Hình
+        function enterFullscreen() {
+            const elem = cameraBox;
+            if (!elem) return;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) {
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) {
+                elem.msRequestFullscreen();
+            }
+        }
+
+        function exitFullscreen() {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            }
+        }
+
+        if (fullscreenBtn) fullscreenBtn.addEventListener('click', enterFullscreen);
+        if (fsCloseBtn) fsCloseBtn.addEventListener('click', exitFullscreen);
+
+        if (fsPrevFrameBtn) {
+            fsPrevFrameBtn.addEventListener('click', () => {
+                currentFrameIndex = (currentFrameIndex - 1 + BOOTH_FRAMES.length) % BOOTH_FRAMES.length;
+                document.querySelectorAll('.frame-card').forEach((c, idx) => {
+                    c.classList.toggle('active', idx === currentFrameIndex);
+                });
+                applyFrameSelection();
+            });
+        }
+
+        if (fsNextFrameBtn) {
+            fsNextFrameBtn.addEventListener('click', () => {
+                currentFrameIndex = (currentFrameIndex + 1) % BOOTH_FRAMES.length;
+                document.querySelectorAll('.frame-card').forEach((c, idx) => {
+                    c.classList.toggle('active', idx === currentFrameIndex);
+                });
+                applyFrameSelection();
+            });
+        }
+
+        if (boothCaptionInput) {
+            boothCaptionInput.addEventListener('input', () => {
+                if (loadedUserImg) renderPhotobooth();
+            });
+        }
+
+        // Dừng camera an toàn và giải phóng phần cứng
+        function stopCamera() {
+            if (boothStream) {
+                try {
+                    boothStream.getTracks().forEach(t => t.stop());
+                } catch(e) {}
+                boothStream = null;
+            }
+            if (cameraVideo) {
+                cameraVideo.pause();
+                cameraVideo.srcObject = null;
+                cameraVideo.style.display = 'none';
+            }
+            if (captureBtn) captureBtn.style.display = 'none';
+            if (fsCaptureBtn) fsCaptureBtn.style.display = 'none';
+            if (startCameraBtn) startCameraBtn.textContent = 'Mở Camera';
+        }
+
+        // Khởi động Camera
+        async function startCamera() {
+            stopCamera();
+            try {
+                boothStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 960 } },
+                    audio: false
+                });
+                cameraVideo.srcObject = boothStream;
+                await cameraVideo.play();
+                cameraVideo.style.display = 'block';
+                userPhotoPreview.style.display = 'none';
+                cameraPlaceholder.style.display = 'none';
+                cameraFrameOverlay.style.display = 'block';
+                captureBtn.style.display = 'inline-flex';
+                if (fsCaptureBtn) fsCaptureBtn.style.display = 'inline-flex';
+                startCameraBtn.textContent = 'Tắt Camera';
+
+                applyFrameSelection();
+            } catch (err) {
+                alert('Không thể mở Camera (hoặc trình duyệt chưa cấp quyền). Bạn có thể bấm "Tải Ảnh Từ Máy" để chọn ảnh có sẵn nhé!');
+                console.error('Lỗi Camera:', err);
+                stopCamera();
+            }
+        }
+
+        if (startCameraBtn) {
+            startCameraBtn.addEventListener('click', async () => {
+                if (boothStream) {
+                    stopCamera();
+                    if (loadedUserImg) {
+                        userPhotoPreview.style.display = 'block';
+                        cameraPlaceholder.style.display = 'none';
+                    } else {
+                        cameraPlaceholder.style.display = 'flex';
+                    }
+                } else {
+                    await startCamera();
+                }
+            });
+        }
+
+        // Chụp ảnh với đếm ngược 3 giây
+        function doCapture() {
+            if (!cameraVideo || cameraVideo.readyState < 2 || cameraVideo.videoWidth === 0) {
+                alert('Camera đang khởi động, vui lòng thử lại sau giây lát!');
+                return;
+            }
+
+            let count = 3;
+            countdownOverlay.textContent = count;
+            countdownOverlay.style.display = 'block';
+
+            const timer = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    countdownOverlay.textContent = count;
+                } else {
+                    clearInterval(timer);
+                    countdownOverlay.style.display = 'none';
+                    flashOverlay.style.opacity = '0.9';
+                    setTimeout(() => flashOverlay.style.opacity = '0', 250);
+
+                    const vw = cameraVideo.videoWidth || 640;
+                    const vh = cameraVideo.videoHeight || 480;
+                    const offCanvas = document.createElement('canvas');
+                    offCanvas.width = vw;
+                    offCanvas.height = vh;
+                    const offCtx = offCanvas.getContext('2d');
+                    offCtx.translate(vw, 0);
+                    offCtx.scale(-1, 1);
+                    offCtx.drawImage(cameraVideo, 0, 0, vw, vh);
+
+                    // Giải phóng camera ngay sau khi chụp xong để không bị lỗi treo thiết bị
+                    stopCamera();
+                    startCameraBtn.textContent = 'Mở Camera Chụp Lại';
+
+                    const snapImg = new Image();
+                    snapImg.onload = () => {
+                        loadedUserImg = snapImg;
+                        userPhotoPreview.src = snapImg.src;
+                        userPhotoPreview.style.display = 'block';
+                        cameraPlaceholder.style.display = 'none';
+                        cameraFrameOverlay.style.display = 'block';
+                        renderPhotobooth();
+
+                        boothResultArea.style.display = 'block';
+                        const celebBox = document.getElementById('boothCelebBox');
+                        if (celebBox) celebBox.style.display = 'block';
+                        boothResultArea.scrollIntoView({ behavior: 'smooth' });
+
+                        earnFlower();
+                    };
+                    snapImg.src = offCanvas.toDataURL('image/jpeg', 0.92);
+                }
+            }, 900);
+        }
+
+        if (captureBtn) captureBtn.addEventListener('click', doCapture);
+        if (fsCaptureBtn) fsCaptureBtn.addEventListener('click', doCapture);
+
+        // Tải ảnh từ máy tính
+        if (uploadPhotoBtn && boothFileInput) {
+            uploadPhotoBtn.addEventListener('click', () => boothFileInput.click());
+            boothFileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (evt) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            loadedUserImg = img;
+                            userPhotoPreview.src = evt.target.result;
+                            userPhotoPreview.style.display = 'block';
+                            cameraPlaceholder.style.display = 'none';
+                            cameraFrameOverlay.style.display = 'block';
+
+                            stopCamera();
+                            renderPhotobooth();
+                            boothResultArea.style.display = 'block';
+                            const celebBox = document.getElementById('boothCelebBox');
+                            if (celebBox) celebBox.style.display = 'block';
+                            boothResultArea.scrollIntoView({ behavior: 'smooth' });
+
+                            earnFlower();
+                        };
+                        img.src = evt.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        // Hàm ghép ảnh người dùng vào khung (Canvas)
+        function renderPhotobooth() {
+            if (!loadedUserImg || !window.BOOTH_FRAMES) return;
+            const frame = BOOTH_FRAMES[currentFrameIndex];
+            if (!frame) return;
+
+            const targetW = frame.width * 2;
+            const targetH = frame.height * 2;
+            boothCanvas.width = targetW;
+            boothCanvas.height = targetH;
+            boothCtx.clearRect(0, 0, targetW, targetH);
+
+            drawUserImageBehindFrame(loadedUserImg, targetW, targetH);
+
+            const frameImg = new Image();
+            frameImg.onload = () => {
+                boothCtx.drawImage(frameImg, 0, 0, targetW, targetH);
+
+                const caption = boothCaptionInput ? boothCaptionInput.value.trim() : '';
+                if (caption) {
+                    boothCtx.save();
+                    boothCtx.font = 'bold 24px "Dancing Script", cursive, sans-serif';
+                    boothCtx.fillStyle = '#4a3b32';
+                    boothCtx.textAlign = 'center';
+                    boothCtx.shadowColor = 'rgba(255, 255, 255, 0.9)';
+                    boothCtx.shadowBlur = 6;
+                    boothCtx.fillText(caption, targetW / 2, targetH - 12);
+                    boothCtx.restore();
+                }
+
+                const dataUrl = boothCanvas.toDataURL('image/jpeg', 0.92);
+                lastBoothPhoto = dataUrl;
+                boothPreviewImg.src = dataUrl;
+                if (attachFromBoothBtn) attachFromBoothBtn.style.display = 'inline-block';
+            };
+            frameImg.src = frame.src;
+        }
+
+        function drawUserImageBehindFrame(img, targetW, targetH) {
+            boothCtx.save();
+            const imgRatio = img.width / img.height;
+            const targetRatio = targetW / targetH;
+            let srcX = 0, srcY = 0, srcW = img.width, srcH = img.height;
+
+            if (imgRatio > targetRatio) {
+                srcW = img.height * targetRatio;
+                srcX = (img.width - srcW) / 2;
+            } else {
+                srcH = img.width / targetRatio;
+                srcY = (img.height - srcH) / 2;
+            }
+
+            boothCtx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, targetW, targetH);
+            boothCtx.restore();
+        }
+
+        // Nút hành động trong kết quả chụp ảnh
+        if (downloadPhotoBtn) {
+            downloadPhotoBtn.addEventListener('click', () => {
+                if (!lastBoothPhoto) return;
+                const link = document.createElement('a');
+                link.download = `anh-ky-niem-20-11-${Date.now()}.jpg`;
+                link.href = lastBoothPhoto;
+                link.click();
+            });
+        }
+
+        if (sendToPostBtn) {
+            sendToPostBtn.addEventListener('click', () => {
+                if (!lastBoothPhoto) return;
+                currentPostImage = lastBoothPhoto;
+                postImagePreviewImg.src = lastBoothPhoto;
+                postImagePreviewContainer.style.display = 'inline-block';
+                switchZoneTab('writeSection');
+                document.getElementById('writeSection').scrollIntoView({ behavior: 'smooth' });
+                alert('Đã đính kèm ảnh vừa tạo vào bài đăng! Hãy viết thêm lời chúc hoặc kỷ niệm và bấm "Lưu Lại Kỷ Niệm" nhé!');
+            });
+        }
+
+        if (shareFacebookBtn) {
+            shareFacebookBtn.addEventListener('click', () => {
+                if (!lastBoothPhoto) return;
+                const link = document.createElement('a');
+                link.download = `anh-ky-niem-20-11-${Date.now()}.jpg`;
+                link.href = lastBoothPhoto;
+                link.click();
+
+                window.open('https://www.facebook.com/', '_blank');
+                alert('Ảnh kỷ niệm đã được tải xuống máy của bạn! Trang Facebook vừa được mở ở tab mới để bạn đăng ảnh nhé!');
+            });
+        }
+
+        // Hành động nhanh: Chọn hoa và tặng Thầy Cô ngay
+        const btnQuickGiftTeacher = document.getElementById('btnQuickGiftTeacher');
+        if (btnQuickGiftTeacher) {
+            btnQuickGiftTeacher.addEventListener('click', () => {
+                if (lastBoothPhoto) {
+                    currentPostImage = lastBoothPhoto;
+                }
+                switchZoneTab('teacherSection');
+                const flowerPicker = document.getElementById('flowerPicker');
+                if (flowerPicker) flowerPicker.scrollIntoView({ behavior: 'smooth' });
+                alert('Bức ảnh vừa tạo đã sẵn sàng! Bạn hãy chọn 1 bó hoa tươi thắm và gửi gắm lời chúc tới Thầy Cô nhé!');
+            });
+        }
+
+        const btnQuickAddToMemory = document.getElementById('btnQuickAddToMemory');
+        if (btnQuickAddToMemory) {
+            btnQuickAddToMemory.addEventListener('click', () => {
+                if (lastBoothPhoto) {
+                    currentPostImage = lastBoothPhoto;
+                    postImagePreviewImg.src = lastBoothPhoto;
+                    postImagePreviewContainer.style.display = 'inline-block';
+                }
+                switchZoneTab('writeSection');
+                document.getElementById('writeSection').scrollIntoView({ behavior: 'smooth' });
+                alert('Đã đính kèm ảnh kỷ niệm vào bài viết! Hãy viết thêm những dòng lưu bút đáng nhớ nhé!');
+            });
+        }
+
+        // Khởi tạo bộ chọn khung ảnh ngay khi tải xong
+        setupFrameSelector();
+
+
+        // ----------------- HIỂN THỊ DANH SÁCH BÀI ĐĂNG (TIMELINE) -----------------
+        // Hàm chống tấn công mã độc XSS
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function renderMemories(filter = 'all') {
+            let filteredMemories = memories;
+            
+            // Lọc theo tab
+            if (filter === 'memory') {
+                filteredMemories = filteredMemories.filter(m => m.type !== 'teacher');
+            } else if (filter === 'teacher') {
+                filteredMemories = filteredMemories.filter(m => m.type === 'teacher');
+            } else if (filter === 'has-image') {
+                filteredMemories = filteredMemories.filter(m => Boolean(m.image));
+            } else if (filter === 'hoc-sinh' || filter === 'cuu-hoc-sinh') {
+                filteredMemories = filteredMemories.filter(m => m.role === filter);
+            }
+            
+            // Lọc theo từ khóa tìm kiếm
+            if (searchQuery.trim() !== '') {
+                filteredMemories = filteredMemories.filter(m => 
+                    (m.name && m.name.toLowerCase().includes(searchQuery)) ||
+                    (m.uniqueCode && m.uniqueCode.toLowerCase().includes(searchQuery)) ||
+                    (m.content && m.content.toLowerCase().includes(searchQuery)) ||
+                    (m.batch && m.batch.toLowerCase().includes(searchQuery)) ||
+                    (m.teacherName && m.teacherName.toLowerCase().includes(searchQuery)) ||
+                    (m.date && m.date.toLowerCase().includes(searchQuery))
+                );
+            }
+            
+            if (filteredMemories.length === 0) {
+                memoryTimeline.innerHTML = '<div id="emptyMessage" style="text-align: center; color: var(--ink-light); font-style: italic; margin-top: 20px;">Không tìm thấy kỷ niệm nào phù hợp.</div>';
+                return;
+            }
+
+            memoryTimeline.innerHTML = '';
+            
+            filteredMemories.forEach(memory => {
+                const item = document.createElement('div');
+                item.className = 'timeline-item';
+                item.dataset.role = memory.role || 'hoc-sinh';
+                
+                const safeName = escapeHtml(memory.name);
+                const safeRoleName = escapeHtml(memory.roleName || 'Học sinh');
+                const safeRoleClass = (memory.role === 'cuu-hoc-sinh') ? 'cuu-hoc-sinh' : 'hoc-sinh';
+                const safeBatch = escapeHtml(memory.batch || '');
+                const safeCode = escapeHtml(memory.uniqueCode || 'N/A');
+                const safeDate = escapeHtml(memory.date);
+                const safeContent = escapeHtml(memory.content).replace(/\n/g, '<br>');
+
+                // Huy hiệu và bó hoa tri ân thầy cô nếu có
+                let teacherBadgeHtml = '';
+                if (memory.type === 'teacher') {
+                    const safeTeacher = escapeHtml(memory.teacherName || 'Toàn thể Thầy Cô');
+                    const safeFlower = escapeHtml(memory.flower || 'Hoa Tri Ân');
+                    const flowerImgTag = memory.flowerImg ? `<img src="${memory.flowerImg}" class="tribute-flower-thumb" alt="${safeFlower}">` : '';
+                    teacherBadgeHtml = `
+                        <div style="margin-top: 10px; display: flex; gap: 14px; align-items: center; background: #fffcf5; padding: 10px 14px; border-radius: 12px; border: 1px dashed var(--yellow);">
+                            ${flowerImgTag}
+                            <div>
+                                <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 4px;">
+                                    <span class="teacher-badge">Kính gửi: ${safeTeacher}</span>
+                                    <span class="flower-gift-badge">Đã trao tặng: ${safeFlower}</span>
+                                </div>
+                                <div style="font-size: 0.88em; color: var(--ink-light); font-style: italic;">Bó hoa tri ân nhân ngày Nhà Giáo Việt Nam 20/11</div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Hình ảnh đính kèm nếu có
+                let imageHtml = '';
+                if (memory.image) {
+                    imageHtml = `
+                        <div>
+                            <img src="${memory.image}" class="timeline-image" onclick="openLightbox(this.src)" title="Bấm vào để xem ảnh phóng to" alt="Ảnh kỷ niệm">
+                        </div>
+                    `;
+                }
+
+                let deleteBtnHtml = '';
+                if (isAdmin) {
+                    deleteBtnHtml = `<div style="text-align: right; margin-top: 10px; border-top: 1px dashed var(--pink-light); padding-top: 10px;"><button onclick="deleteMemory('${safeCode}')" style="background: var(--red); color: white; border: none; padding: 4px 10px; border-radius: 5px; cursor: pointer; font-size: 0.85em; font-family: var(--font-body); font-weight: 600;">Xóa bài này</button></div>`;
+                }
+                
+                item.innerHTML = `
+                    <div class="timeline-author" style="flex-wrap: wrap;">
+                        <span class="timeline-author-name">${safeName}</span>
+                        <span class="role-tag role-${safeRoleClass}">${safeRoleName}</span>
+                        <span class="role-tag" style="background: var(--pink-light); color: var(--ink); margin-left: 5px;">${safeBatch}</span>
+                        <span style="margin-left: auto; font-family: monospace; color: var(--ink-light); font-size: 0.9em; padding: 2px 6px; border: 1px dashed var(--pink); border-radius: 4px; background: var(--paper);">ID: ${safeCode}</span>
+                    </div>
+                    ${teacherBadgeHtml}
+                    <span class="timeline-date-time">${safeDate}</span>
+                    <div class="timeline-text">${safeContent}</div>
+                    ${imageHtml}
+                    ${deleteBtnHtml}
+                `;
+                
+                memoryTimeline.appendChild(item);
+                observeNewItem(item);
+            });
+        }
+
+        // Lọc tùy bút
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                tabBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                renderMemories(btn.dataset.filter);
+            });
+        });
+
+        // ----------------- TRÌNH PHÁT NHẠC (PLAYLIST) -----------------
+        const songs = [
+            { title: "Mùa Hè Của Peppa (Khi anh chạy về phía em)", src: "Mùa hè của peppa( 当我飞奔向你 - Ost Khi anh chạy về phía em.mp3" },
+            { title: "Người Gieo Mầm Xanh (Piano Cover)", src: "Người Gieo Mầm Xanh - Piano Cover - Hùng Music.mp3" },
+            { title: "Có Hẹn Với Thanh Xuân (Piano Cover)", src: "Có Hẹn Với Thanh Xuân - MONSTAR -- Piano Cover -- AnCoong.mp3" }
+        ];
+        
+        let currentSongIndex = 0;
+        const bgMusic = document.getElementById('bgMusic');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const playlistEl = document.getElementById('playlist');
+        const diskIcon = document.getElementById('diskIcon');
+        let hasInteracted = false;
+
+        function loadSong(index) {
+            bgMusic.src = songs[index].src;
+            renderPlaylist();
+        }
+
+        function renderPlaylist() {
+            playlistEl.innerHTML = '';
+            songs.forEach((song, index) => {
+                const li = document.createElement('li');
+                li.textContent = `${index + 1}. ${song.title}`;
+                if (index === currentSongIndex) li.classList.add('active');
+                li.addEventListener('click', () => {
+                    currentSongIndex = index;
+                    loadSong(currentSongIndex);
+                    if (song.src !== "") playMusic();
+                    else alert("Bài hát này chưa có file nhạc! Vui lòng tải thêm.");
+                });
+                playlistEl.appendChild(li);
+            });
+        }
+
+        function playMusic() {
+            if (!bgMusic.src || bgMusic.src.endsWith(window.location.host + "/")) {
+                alert("Vui lòng chọn bài có sẵn file nhạc!");
+                return;
+            }
+            bgMusic.play().then(() => {
+                playPauseBtn.innerHTML = '<svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
+                diskIcon.style.animationPlayState = 'running';
+            }).catch(e => console.log("Lỗi autoplay: ", e));
+        }
+
+        function pauseMusic() {
+            bgMusic.pause();
+            playPauseBtn.innerHTML = '<svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+            diskIcon.style.animationPlayState = 'paused';
+        }
+
+        playPauseBtn.addEventListener('click', () => {
+            if (bgMusic.paused) playMusic();
+            else pauseMusic();
+        });
+
+        prevBtn.addEventListener('click', () => {
+            currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
+            loadSong(currentSongIndex);
+            if (songs[currentSongIndex].src) playMusic();
+        });
+
+        nextBtn.addEventListener('click', () => {
+            currentSongIndex = (currentSongIndex + 1) % songs.length;
+            loadSong(currentSongIndex);
+            if (songs[currentSongIndex].src) playMusic();
+        });
+
+        bgMusic.addEventListener('ended', () => {
+            nextBtn.click();
+        });
+
+        // Tự động phát khi tương tác
+        document.body.addEventListener('click', () => {
+            if (!hasInteracted && bgMusic.paused) {
+                hasInteracted = true;
+                if (songs[currentSongIndex].src) playMusic();
+            }
+        }, { once: true });
+
+        // Khởi tạo
+        loadSong(currentSongIndex);
+
+    </script>
+
+    <!-- Modal xem ảnh phóng to -->
+    <div id="imageLightbox" class="lightbox-modal" onclick="closeLightbox()">
+        <img id="lightboxImg" src="" alt="Ảnh phóng to">
+    </div>
+
+    
+    
+
+</body>
+
+</html>
