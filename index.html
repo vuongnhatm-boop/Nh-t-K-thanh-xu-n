@@ -3569,6 +3569,12 @@
                     renderMemories(activeTab ? activeTab.dataset.filter : 'all');
                     renderTeacherCards();
                     updateFlowerCounter();
+                } else {
+                    memories = [];
+                    const activeTab = document.querySelector('.tab-btn.active');
+                    renderMemories(activeTab ? activeTab.dataset.filter : 'all');
+                    renderTeacherCards();
+                    updateFlowerCounter();
                 }
             }, (error) => {
                 console.warn('Firebase RTDB note:', error);
