@@ -1728,6 +1728,68 @@
             border: 3px solid white;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
+
+        /* Hiệu ứng xoay xoay như mạng lag / đang tải ảnh cho Thầy Cô chưa có ảnh */
+        .teacher-avatar-circle.avatar-lagging {
+            position: relative;
+            overflow: visible !important;
+        }
+        .teacher-avatar-circle.avatar-lagging::before {
+            content: '';
+            position: absolute;
+            inset: -6px;
+            border-radius: 50%;
+            border: 3px dashed var(--avatar-border-color, #f43f5e);
+            border-top-color: transparent;
+            border-bottom-color: transparent;
+            animation: lagSpinRing 2.2s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
+            pointer-events: none;
+            z-index: 2;
+        }
+        .teacher-avatar-circle.avatar-lagging .lag-spin-svg {
+            display: inline-block;
+            transform-origin: center center;
+            animation: lagIconSpin 2.4s steps(10, end) infinite;
+        }
+        .avatar-lag-pill {
+            position: absolute;
+            bottom: -9px;
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid rgba(245, 158, 11, 0.6);
+            color: #fbbf24;
+            font-size: 0.58em;
+            font-weight: 700;
+            padding: 1px 7px;
+            border-radius: 10px;
+            white-space: nowrap;
+            letter-spacing: -0.2px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+            animation: lagBadgePulse 1.6s ease-in-out infinite;
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        @keyframes lagSpinRing {
+            0% { transform: rotate(0deg); }
+            35% { transform: rotate(230deg); }
+            55% { transform: rotate(205deg); }
+            80% { transform: rotate(340deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes lagIconSpin {
+            0% { transform: rotate(0deg) scale(1); }
+            20% { transform: rotate(72deg) scale(0.92); }
+            40% { transform: rotate(144deg) scale(1.06); }
+            60% { transform: rotate(216deg) scale(0.94); }
+            80% { transform: rotate(288deg) scale(1.02); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+
+        @keyframes lagBadgePulse {
+            0%, 100% { opacity: 0.78; transform: scale(0.96); }
+            50% { opacity: 1; transform: scale(1.05); }
+        }
         .teacher-card-name {
             font-family: var(--font-hand);
             font-size: 1.45em;
@@ -4403,16 +4465,17 @@
                 card.style.borderColor = t.border;
                 card.innerHTML = `
                     <div>
-                        <div class="teacher-avatar-circle" style="background: ${t.avatarColor}20; color: ${t.avatarColor}; position: relative; overflow: hidden; border: 2.5px solid ${t.avatarColor};">
+                        <div class="teacher-avatar-circle ${t.avatarImg ? '' : 'avatar-lagging'}" style="background: ${t.avatarColor}20; color: ${t.avatarColor}; position: relative; border: 2.5px solid ${t.avatarColor}; --avatar-border-color: ${t.avatarColor};">
                             ${t.avatarImg ? `
-                                <img src="${t.avatarImg}" alt="${t.name}" class="teacher-real-avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                                <svg width="36" height="36" viewBox="0 0 24 24" fill="currentColor" style="display: none;">
+                                <img src="${t.avatarImg}" alt="${t.name}" class="teacher-real-avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block;" onerror="this.style.display='none'; this.parentElement.classList.add('avatar-lagging'); this.nextElementSibling.style.display='block'; if(!this.parentElement.querySelector('.avatar-lag-pill')){ const pill=document.createElement('span'); pill.className='avatar-lag-pill'; pill.textContent='⏳ Đang tải...'; this.parentElement.appendChild(pill); }">
+                                <svg width="36" height="36" viewBox="0 0 24 24" fill="currentColor" class="lag-spin-svg" style="display: none;">
                                     ${t.iconSvg}
                                 </svg>
                             ` : `
-                                <svg width="36" height="36" viewBox="0 0 24 24" fill="currentColor">
+                                <svg width="36" height="36" viewBox="0 0 24 24" fill="currentColor" class="lag-spin-svg">
                                     ${t.iconSvg}
                                 </svg>
+                                <span class="avatar-lag-pill">⏳ Đang tải...</span>
                             `}
                         </div>
                         ${deptTagHtml}
