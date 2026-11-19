@@ -3430,7 +3430,12 @@
                 const birthYear = 1977 + i;
                 const option = document.createElement('option');
                 option.value = 'K' + i;
-                option.textContent = `Khóa ${i} - K${i} (Sinh năm ${birthYear})`;
+                let roleTag = '';
+                if (i === 34) roleTag = ' • Lớp 10 (Học sinh)';
+                else if (i === 33) roleTag = ' • Lớp 11 (Học sinh)';
+                else if (i === 32) roleTag = ' • Lớp 12 (Học sinh)';
+                else roleTag = ' • Cựu học sinh';
+                option.textContent = `Khóa ${i} - K${i} (Sinh năm ${birthYear}${roleTag})`;
                 selectEl.appendChild(option);
             }
         }
@@ -3438,6 +3443,35 @@
         populateBatches(teacherBatchSelect);
         const gateBatchSelect = document.getElementById('gateBatch');
         populateBatches(gateBatchSelect);
+
+        // Tự động phân loại: K32, K33, K34 -> Học sinh; Các khóa còn lại -> Cựu học sinh
+        function isCurrentStudentBatch(batchStr) {
+            if (!batchStr) return false;
+            const b = String(batchStr).trim().toUpperCase();
+            return b === 'K32' || b === 'K33' || b === 'K34' || b === '32' || b === '33' || b === '34';
+        }
+
+        if (gateBatchSelect) {
+            gateBatchSelect.addEventListener('change', (e) => {
+                const val = e.target.value;
+                const currentRoleRadio = document.querySelector('input[name="gateRole"]:checked');
+                // Nếu không chọn Thầy Cô, tự động gán theo Niên khóa
+                if (!currentRoleRadio || currentRoleRadio.value !== 'thay-co') {
+                    const isStudent = isCurrentStudentBatch(val);
+                    const targetRadio = document.querySelector(`input[name="gateRole"][value="${isStudent ? 'hoc-sinh' : 'cuu-hoc-sinh'}"]`);
+                    if (targetRadio) targetRadio.checked = true;
+                }
+            });
+        }
+
+        if (batchSelect) {
+            batchSelect.addEventListener('change', (e) => {
+                const val = e.target.value;
+                const isStudent = isCurrentStudentBatch(val);
+                const targetRadio = document.querySelector(`input[name="userRole"][value="${isStudent ? 'hoc-sinh' : 'cuu-hoc-sinh'}"]`);
+                if (targetRadio) targetRadio.checked = true;
+            });
+        }
 
         let memories = [];
 
@@ -3486,6 +3520,13 @@
             if (saved) {
                 try {
                     currentUser = JSON.parse(saved);
+                    // Cập nhật tự động vai trò cho đúng quy tắc K32, 33, 34 là Học sinh, còn lại là Cựu học sinh
+                    if (currentUser && currentUser.role !== 'thay-co' && currentUser.batch) {
+                        const isStudent = isCurrentStudentBatch(currentUser.batch);
+                        currentUser.role = isStudent ? 'hoc-sinh' : 'cuu-hoc-sinh';
+                        currentUser.roleName = isStudent ? 'Học sinh' : 'Cựu học sinh';
+                        localStorage.setItem('thanhxuan_user', JSON.stringify(currentUser));
+                    }
                     applyUserSession(currentUser);
                     if (gatekeeperScreen) gatekeeperScreen.style.display = 'none';
                 } catch(e) {
@@ -3501,7 +3542,10 @@
                 e.preventDefault();
                 const name = document.getElementById('gateName').value.trim();
                 const batch = document.getElementById('gateBatch').value;
-                const role = document.querySelector('input[name="gateRole"]:checked').value;
+                let role = document.querySelector('input[name="gateRole"]:checked').value;
+                if (role !== 'thay-co') {
+                    role = isCurrentStudentBatch(batch) ? 'hoc-sinh' : 'cuu-hoc-sinh';
+                }
                 const roleName = role === 'cuu-hoc-sinh' ? 'Cựu học sinh' : (role === 'thay-co' ? 'Thầy Cô' : 'Học sinh');
 
                 if (!name || !batch) {
@@ -5020,8 +5064,9 @@
             const authorName = document.getElementById('authorName').value;
             const authorBatch = document.getElementById('authorBatch').value;
             const memoryContent = document.getElementById('memoryContent').value;
-            const userRole = document.querySelector('input[name="userRole"]:checked').value;
-            
+            let userRole = document.querySelector('input[name="userRole"]:checked')?.value || 'hoc-sinh';
+            // Tự động phân loại: K32, 33, 34 là Học sinh; Còn lại là Cựu học sinh
+            userRole = isCurrentStudentBatch(authorBatch) ? 'hoc-sinh' : 'cuu-hoc-sinh';
             const roleName = userRole === 'hoc-sinh' ? 'Học sinh' : 'Cựu học sinh';
             const uniqueCode = generateUniqueCode(authorBatch);
             
