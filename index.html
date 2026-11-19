@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nhật Ký Thanh Xuân • Kỷ niệm học trò</title>
+    <title>Nhật Ký Thanh Xuân | Trường PTDTNT THPT Lào Cai</title>
     <link
         href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Patrick+Hand&family=Quicksand:wght@400;500;600&display=swap"
         rel="stylesheet">
@@ -2722,7 +2722,7 @@
             </div>
             <h2 class="gate-title">Nhật Ký Thanh Xuân</h2>
             <p class="gate-subtitle">"Một thời áo trắng, một đời nhớ thương"</p>
-            <p class="gate-desc">Chào mừng bạn trở về với những năm tháng rực rỡ dưới mái trường xưa. Vui lòng nhập thông tin để cùng lưu bút và gửi hoa tri ân Thầy Cô nhé!</p>
+            <p class="gate-desc">Chào mừng bạn trở về với những năm tháng rực rỡ dưới mái trường PTDTNT THPT Lào Cai. Vui lòng nhập thông tin để cùng lưu bút và gửi hoa tri ân Thầy Cô nhé!</p>
 
             <form id="gateForm">
                 <div class="gate-input-group">
@@ -2757,6 +2757,7 @@
     <div class="container">
         <header class="notebook-header">
             <h1>Nhật Ký Thanh Xuân</h1>
+            <p class="subtitle" style="font-weight: 700; color: var(--red); font-size: 1.15em; letter-spacing: 0.5px; margin-bottom: 4px;">Trường PTDTNT THPT Lào Cai</p>
             <p class="subtitle">“Một thời áo trắng, một đời nhớ thương”</p>
         </header>
 
@@ -3118,7 +3119,7 @@
         </section>
 
         <footer class="footer" style="text-align: center; padding: 30px 20px; color: var(--ink-light); font-size: 0.9em;">
-            <p>🌸 Mái Trường THPT DTNT Tỉnh Lào Cai — Nơi lưu giữ những năm tháng thanh xuân rực rỡ nhất 🌸</p>
+            <p>🌸 Trường PTDTNT THPT Lào Cai — Nơi lưu giữ những năm tháng thanh xuân rực rỡ nhất 🌸</p>
         </footer>
     </div>
 
@@ -6003,7 +6004,7 @@
                 const isAuthor = Boolean(currentUserName && currentUserName === authorName);
                 const isTeacherRole = Boolean(currentUser && currentUser.role === 'thay-co');
                 const isUnlocked = Boolean(window.unlockedPrivateCodes && window.unlockedPrivateCodes.has(memory.uniqueCode));
-                const canViewPrivate = (!isPrivateMsg) || isAdmin || isAuthor || isTeacherRole || isUnlocked;
+                const canViewPrivate = (!isPrivateMsg) || isAdmin || isAuthor || isTeacherRole || isUnlocked || Boolean(window.isSecretMasterUnlocked);
 
                 let contentBodyHtml = '';
                 if (canViewPrivate) {
@@ -6277,6 +6278,87 @@
                 if (playlistToggleIcon) playlistToggleIcon.style.transform = 'rotate(180deg)';
             }
         }
+    
+        // ================= CHẾ ĐỘ BÍ MẬT: GÕ 'bimatloichuc' ĐỂ XEM HẾT LỜI CHÚC THẦY CÔ =================
+        window.isSecretMasterUnlocked = false;
+        let secretCharBuffer = '';
+        const SECRET_CODE = 'bimatloichuc';
+
+        function toggleSecretTeacherWishes() {
+            window.isSecretMasterUnlocked = !window.isSecretMasterUnlocked;
+            
+            // Re-render memories to reveal/hide all private letters
+            const activeTab = document.querySelector('.tab-btn.active');
+            renderMemories(activeTab ? activeTab.dataset.filter : 'all');
+
+            let indicator = document.getElementById('secretModeIndicator');
+            if (window.isSecretMasterUnlocked) {
+                if (!indicator) {
+                    indicator = document.createElement('div');
+                    indicator.id = 'secretModeIndicator';
+                    indicator.style.cssText = 'position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #1e293b, #0f172a); color: #fbbf24; border: 2px solid #f59e0b; padding: 10px 20px; border-radius: 30px; font-weight: 700; font-size: 0.88em; z-index: 9999; box-shadow: 0 8px 30px rgba(245, 158, 11, 0.4); display: flex; align-items: center; gap: 10px; animation: slideUp 0.3s ease;';
+                    indicator.innerHTML = `
+                        <span>🔓 <strong>CHẾ ĐỘ BÍ MẬT ĐANG BẬT:</strong> Đang xem toàn bộ lời chúc riêng tư gửi Thầy Cô!</span>
+                        <button type="button" id="btnCloseSecretMode" style="background: rgba(245,158,11,0.2); border: 1px solid #f59e0b; color: #fde68a; border-radius: 12px; padding: 2px 8px; cursor: pointer; font-size: 0.85em;">Khóa Lại [X]</button>
+                    `;
+                    document.body.appendChild(indicator);
+                    document.getElementById('btnCloseSecretMode').addEventListener('click', toggleSecretTeacherWishes);
+                } else {
+                    indicator.style.display = 'flex';
+                }
+
+                showCuteAlert(
+                    '🔓 MỞ KHÓA BÍ MẬT THÀNH CÔNG!',
+                    'Bạn đã kích hoạt chế độ xem toàn bộ lời chúc bí mật dành cho các Thầy Cô! Toàn bộ các phong thư kín và lời nhắn riêng tư trên dòng thời gian đã được mở khóa tự động.'
+                );
+            } else {
+                if (indicator) indicator.style.display = 'none';
+                showCuteAlert(
+                    '🔒 ĐÃ KHÓA LẠI CHẾ ĐỘ BÍ MẬT',
+                    'Đã khóa lại các bức thư kín riêng tư của Thầy Cô theo đúng chế độ bảo mật.'
+                );
+            }
+        }
+
+        // Lắng nghe gõ phím toàn trang: Gõ 'bimatloichuc'
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+                return;
+            }
+
+            const key = (e.key || '').toLowerCase();
+            if (key.length === 1 && key >= 'a' && key <= 'z') {
+                secretCharBuffer += key;
+                if (secretCharBuffer.length > 25) {
+                    secretCharBuffer = secretCharBuffer.slice(-25);
+                }
+
+                if (secretCharBuffer.endsWith(SECRET_CODE)) {
+                    secretCharBuffer = '';
+                    toggleSecretTeacherWishes();
+                }
+            }
+        });
+
+        // Hỗ trợ phím tắt bí mật: Ctrl + Shift + B (hoặc click 5 lần vào tiêu đề)
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'b' || e.key === 'B')) {
+                e.preventDefault();
+                showCutePrompt(
+                    'Mật Mã Bí Mật',
+                    'Nhập mã bí mật để mở khóa toàn bộ lời chúc gửi Thầy Cô:',
+                    'Nhập mã bí mật...',
+                    (val) => {
+                        if (val && val.trim().toLowerCase() === SECRET_CODE) {
+                            toggleSecretTeacherWishes();
+                        } else if (val) {
+                            showCuteAlert('Sai Mật Mã', 'Mã bí mật không chính xác!');
+                        }
+                    }
+                );
+            }
+        });
+
     </script>
 
     <!-- Modal xem ảnh phóng to -->
